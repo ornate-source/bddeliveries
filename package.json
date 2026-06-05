@@ -1,0 +1,29 @@
+{
+  "name": "bddeliveries",
+  "version": "1.0.0",
+  "description": "Centralized delivery gateway abstraction for Pathao, RedX, Steadfast, eCourier, Paperfly, and DHL.",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "author": "Sabbir Mahmud",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  },
+  "keywords": [
+    "delivery",
+    "courier",
+    "pathao",
+    "steadfast",
+    "ecourier",
+    "paperfly",
+    "dhl",
+    "bangladesh"
+  ]
+}
