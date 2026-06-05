@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDDeliveries | Documentation</title>
+    <meta name="description"
+        content="Unified delivery gateway package for Node.js — one API for Pathao, Steadfast, eCourier, Paperfly, and DHL.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="dark">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-text">bddeliveries</span>
+                </div>
+                <div class="header-actions-sidebar">
+                    <button id="theme-toggle-desktop" class="theme-btn" aria-label="Toggle Theme">
+                        <i data-lucide="sun" class="sun-icon"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </button>
+                    <button id="sidebar-close" class="mobile-only theme-btn" aria-label="Close Menu">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#introduction" class="active"><i data-lucide="home"></i> Introduction</a></li>
+                    <li><a href="#installation"><i data-lucide="download"></i> Installation</a></li>
+                    <li><a href="#configuration"><i data-lucide="settings"></i> Configuration</a></li>
+                    <li><a href="#quick-start"><i data-lucide="rocket"></i> Quick Start</a></li>
+                    <li>
+                        <a href="#gateways"><i data-lucide="truck"></i> Gateways</a>
+                        <ul class="submenu">
+                            <li><a href="#gateway-pathao">Pathao</a></li>
+                            <li><a href="#gateway-steadfast">Steadfast</a></li>
+                            <li><a href="#gateway-ecourier">eCourier</a></li>
+                            <li><a href="#gateway-paperfly">Paperfly</a></li>
+                            <li><a href="#gateway-dhl">DHL</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#create-order"><i data-lucide="package-plus"></i> Create Order</a></li>
+                    <li><a href="#track-order"><i data-lucide="map-pin"></i> Track Order</a></li>
+                    <li><a href="#cancel-order"><i data-lucide="x-circle"></i> Cancel Order</a></li>
+                    <li><a href="#error-handling"><i data-lucide="alert-circle"></i> Error Handling</a></li>
+                    <li><a href="#typescript"><i data-lucide="code"></i> TypeScript</a></li>
+                    <li><a href="#api-reference"><i data-lucide="book-open"></i> API Reference</a></li>
+                    <li><a href="#env-variables"><i data-lucide="lock"></i> Env Variables</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <header class="mobile-header">
+                <div class="logo">
+                    <span class="logo-text">bddeliveries</span>
+                </div>
+                <div class="header-actions">
+                    <button id="theme-toggle-mobile" class="theme-btn" aria-label="Toggle Theme">
+                        <i data-lucide="sun" class="sun-icon"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </button>
+                    <button id="menu-toggle" class="theme-btn mobile-only" aria-label="Toggle Menu">
+                        <i data-lucide="menu"></i>
+                    </button>
+                </div>
+            </header>
+
+            <section id="introduction" class="section">
+                <h1>BDDeliveries</h1>
+                <p class="lead">A unified delivery gateway package for Node.js. One API for
+                    <strong>Pathao</strong>, <strong>Steadfast</strong>, <strong>eCourier</strong>, <strong>Paperfly</strong>, and <strong>DHL</strong>.
+                </p>
+                <div class="badges">
+                    <span class="badge"><i data-lucide="check-circle"></i> Node 18+</span>
+                    <span class="badge"><i data-lucide="shield"></i> TypeScript</span>
+                    <span class="badge badge-accent"><i data-lucide="zap"></i> Zero Config</span>
+                    <span class="badge badge-green"><i data-lucide="globe"></i> 5 Gateways</span>
+                    <span class="badge badge-purple"><i data-lucide="lock"></i> MIT License</span>
+                </div>
+                <p>Designed for developers who need to integrate multiple courier providers without writing
+                    gateway-specific code. Call <code>createOrder()</code>, <code>trackOrder()</code>, or
+                    <code>cancelOrder()</code> — and let BDDeliveries route to the right adapter internally.
+                </p>
+            </section>
+
+            <section id="installation" class="section">
+                <h2><i data-lucide="terminal"></i> Installation</h2>
+                <p>Install the core package:</p>
+                <div class="code-block" data-lang="bash">
+                    <pre><code>npm install bddeliveries</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="configuration" class="section">
+                <h2><i data-lucide="settings"></i> Configuration</h2>
+                <p>BDDeliveries supports a <strong>three-tier credential system</strong>. Use whichever method
+                    fits your app — or combine them. Highest priority wins.</p>
+
+                <div class="tier-list">
+                    <div class="tier-item">
+                        <div class="tier-number">1</div>
+                        <div class="tier-content">
+                            <h4>Per-Call Overrides <span class="badge" style="font-size:0.65rem; padding:0.2rem 0.5rem; vertical-align: middle;">Highest Priority</span></h4>
+                            <p>Pass credentials directly in any function call. Useful for multi-tenant apps
+                                where different merchants have different keys.</p>
+                        </div>
+                    </div>
+                    <div class="tier-item">
+                        <div class="tier-number">2</div>
+                        <div class="tier-content">
+                            <h4>Global <code>configure()</code> <span class="badge badge-green" style="font-size:0.65rem; padding:0.2rem 0.5rem; vertical-align: middle;">Recommended</span></h4>
+                            <p>Call once at app startup to set credentials for all gateways you use.</p>
+                        </div>
+                    </div>
+                    <div class="tier-item">
+                        <div class="tier-number">3</div>
+                        <div class="tier-content">
+                            <h4>Environment Variables <span class="badge badge-purple" style="font-size:0.65rem; padding:0.2rem 0.5rem; vertical-align: middle;">Zero Config</span></h4>
+                            <p>Set env vars and the package reads them automatically — no code needed.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Global Configure Example</h3>
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { configure } from 'bddeliveries';
+
+configure({
+  pathao: {
+    clientId: process.env.PATHAO_CLIENT_ID,
+    clientSecret: process.env.PATHAO_CLIENT_SECRET,
+    username: process.env.PATHAO_USERNAME,
+    password: process.env.PATHAO_PASSWORD,
+  },
+  steadfast: {
+    apiKey: process.env.STEADFAST_API_KEY,
+    secretKey: process.env.STEADFAST_SECRET_KEY,
+  },
+});</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <h3>Per-Call Override Example</h3>
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { createOrder } from 'bddeliveries';
+
+// This apiKey overrides whatever was set in configure()
+await createOrder({
+  gateway: 'steadfast',
+  apiKey: 'API_KEY_OVERRIDE',
+  secretKey: 'SECRET_KEY_OVERRIDE',
+  recipientName: 'John Doe',
+  address: 'Dhaka',
+});</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="quick-start" class="section">
+                <h2><i data-lucide="play"></i> Quick Start</h2>
+                <p>Get up and running in three steps: configure, create, and track.</p>
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { configure, createOrder, trackOrder } from 'bddeliveries';
+
+// 1. Configure credentials once
+configure({
+  pathao: { clientId: '...', clientSecret: '...', username: '...', password: '...' },
+});
+
+// 2. Create Order — same function, any gateway
+const order = await createOrder({
+  gateway: 'pathao',
+  recipientName: 'Jane Doe',
+  address: 'Mirpur, Dhaka',
+  amount: 1500,
+});
+
+console.log(order.trackingId); // "PATHAO-..."
+console.log(order.status);     // "created"
+
+// 3. Track Order
+const tracking = await trackOrder({
+  gateway: 'pathao',
+  trackingId: order.trackingId,
+});
+
+console.log(tracking.status);  // "in_transit"
+</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="gateways" class="section">
+                <h2><i data-lucide="truck"></i> Supported Gateways</h2>
+                <p>Each gateway is loaded lazily — only the adapter you actually use gets imported at runtime.</p>
+
+                <div class="gateway-grid">
+                    <div class="gateway-card">
+                        <h4><i data-lucide="map"></i> Pathao</h4>
+                        <p>Popular last-mile delivery service in BD.</p>
+                        <div class="gateway-badges">
+                            <span class="badge">Client ID/Secret</span>
+                        </div>
+                    </div>
+                    <div class="gateway-card">
+                        <h4><i data-lucide="package"></i> Steadfast</h4>
+                        <p>Reliable and fast delivery courier in BD.</p>
+                        <div class="gateway-badges">
+                            <span class="badge">API/Secret Key</span>
+                        </div>
+                    </div>
+                    <div class="gateway-card">
+                        <h4><i data-lucide="truck"></i> eCourier</h4>
+                        <p>Tech-based courier service in Bangladesh.</p>
+                        <div class="gateway-badges">
+                            <span class="badge">API Key/Secret</span>
+                        </div>
+                    </div>
+                    <div class="gateway-card">
+                        <h4><i data-lucide="send"></i> Paperfly</h4>
+                        <p>High-coverage delivery network.</p>
+                        <div class="gateway-badges">
+                            <span class="badge">Username/Password</span>
+                        </div>
+                    </div>
+                    <div class="gateway-card">
+                        <h4><i data-lucide="globe"></i> DHL</h4>
+                        <p>International and domestic premium courier.</p>
+                        <div class="gateway-badges">
+                            <span class="badge">API Key</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="create-order" class="section">
+                <h2><i data-lucide="package-plus"></i> Create Order</h2>
+                <p>Create a delivery order through any gateway. Pass <code>gateway</code> plus the relevant options.</p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>const result = await createOrder({
+  gateway: 'pathao',
+  recipientName: 'John Doe',
+  address: 'Gulshan, Dhaka',
+  amount: 2000,
+});</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="track-order" class="section">
+                <h2><i data-lucide="map-pin"></i> Track Order</h2>
+                <p>Track a delivery. Pass the <code>trackingId</code> from the original order.</p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { trackOrder } from 'bddeliveries';
+
+const status = await trackOrder({
+  gateway: 'pathao',
+  trackingId: 'PATHAO-12345',
+});
+
+console.log(status);</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="cancel-order" class="section">
+                <h2><i data-lucide="x-circle"></i> Cancel Order</h2>
+                <p>Cancel an existing order. Some gateways may only allow cancellation before dispatch.</p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { cancelOrder } from 'bddeliveries';
+
+const cancellation = await cancelOrder({
+  gateway: 'steadfast',
+  trackingId: 'STEADFAST-98765',
+});
+
+console.log(cancellation.status); // "cancelled"</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="error-handling" class="section">
+                <h2><i data-lucide="alert-circle"></i> Error Handling</h2>
+                <p>BDDeliveries provides a structured error hierarchy for precise error handling.</p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import {
+  createOrder,
+  DeliveryError,
+  GatewayNotFoundError,
+  ConfigurationError,
+} from 'bddeliveries';
+
+try {
+  await createOrder({ gateway: 'pathao', recipientName: 'Jane' });
+} catch (error) {
+  if (error instanceof ConfigurationError) {
+    // Missing API keys
+    console.log('Missing:', error.missingKeys);
+  } else if (error instanceof GatewayNotFoundError) {
+    // Unknown gateway name
+    console.log('Unsupported gateway');
+  } else if (error instanceof DeliveryError) {
+    // Gateway-specific failure
+    console.log(error.gateway);
+    console.log(error.code);
+    console.log(error.originalError);
+  }
+}</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="typescript" class="section">
+                <h2><i data-lucide="code"></i> TypeScript Support</h2>
+                <p>Full type definitions are included.</p>
+                <div class="code-block" data-lang="typescript">
+                    <pre><code>import {
+  createOrder,
+  configure,
+  type CreateOrderOptions,
+} from 'bddeliveries';
+
+const options: CreateOrderOptions = {
+  gateway: 'pathao',
+  recipientName: 'Jane',
+};
+
+const result = await createOrder(options);</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="api-reference" class="section">
+                <h2><i data-lucide="book-open"></i> API Reference</h2>
+
+                <h3>Functions</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>configure(configs)</code></td>
+                                <td>Set global credentials for one or more gateways.</td>
+                                <td><code>void</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>clearConfig()</code></td>
+                                <td>Clear all stored global configuration.</td>
+                                <td><code>void</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>createOrder(options)</code></td>
+                                <td>Create an order through any gateway.</td>
+                                <td><code>Promise&lt;any&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>trackOrder(options)</code></td>
+                                <td>Track an existing order.</td>
+                                <td><code>Promise&lt;any&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>cancelOrder(options)</code></td>
+                                <td>Cancel an existing order.</td>
+                                <td><code>Promise&lt;any&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>getSupportedGateways()</code></td>
+                                <td>Returns array of supported gateway names.</td>
+                                <td><code>string[]</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="env-variables" class="section">
+                <h2><i data-lucide="lock"></i> Environment Variables</h2>
+                <p>Set these environment variables and skip <code>configure()</code> entirely.</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Gateway</th>
+                                <th>Environment Variables</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pathao</td>
+                                <td><code>PATHAO_CLIENT_ID</code>, <code>PATHAO_CLIENT_SECRET</code>, <code>PATHAO_USERNAME</code>, <code>PATHAO_PASSWORD</code>, <code>PATHAO_SANDBOX</code></td>
+                            </tr>
+                            <tr>
+                                <td>Steadfast</td>
+                                <td><code>STEADFAST_API_KEY</code>, <code>STEADFAST_SECRET_KEY</code>, <code>STEADFAST_SANDBOX</code></td>
+                            </tr>
+                            <tr>
+                                <td>eCourier</td>
+                                <td><code>ECOURIER_API_KEY</code>, <code>ECOURIER_API_SECRET</code>, <code>ECOURIER_USER_ID</code>, <code>ECOURIER_SANDBOX</code></td>
+                            </tr>
+                            <tr>
+                                <td>Paperfly</td>
+                                <td><code>PAPERFLY_USERNAME</code>, <code>PAPERFLY_PASSWORD</code>, <code>PAPERFLY_SANDBOX</code></td>
+                            </tr>
+                            <tr>
+                                <td>DHL</td>
+                                <td><code>DHL_API_KEY</code>, <code>DHL_API_SECRET</code>, <code>DHL_ACCOUNT_NUMBER</code>, <code>DHL_SANDBOX</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script for UI Interactions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const html = document.documentElement;
+            const body = document.body;
+            
+            // Theme toggling
+            const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
+            const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+            
+            function toggleTheme() {
+                if (body.classList.contains('dark')) {
+                    body.classList.replace('dark', 'light');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    body.classList.replace('light', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+            
+            themeToggleDesktop.addEventListener('click', toggleTheme);
+            themeToggleMobile.addEventListener('click', toggleTheme);
+            
+            // Sidebar toggling for mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebarClose = document.getElementById('sidebar-close');
+            const sidebar = document.querySelector('.sidebar');
+            
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.add('active');
+            });
+            
+            sidebarClose.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+            });
+
+            // Smooth scrolling for sidebar links
+            const links = document.querySelectorAll('.sidebar-nav a[href^="#"]');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if(window.innerWidth <= 768) sidebar.classList.remove('active');
+                    
+                    document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetEl = document.querySelector(targetId);
+                    if (targetEl) {
+                        window.scrollTo({
+                            top: targetEl.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Copy code blocks
+            const copyBtns = document.querySelectorAll('.copy-btn');
+            copyBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const code = btn.previousElementSibling.innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '<i data-lucide="check"></i> Copied';
+                        lucide.createIcons();
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            lucide.createIcons();
+                        }, 2000);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
