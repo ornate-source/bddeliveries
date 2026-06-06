@@ -7,40 +7,6 @@ import { ConfigurationError } from "./errors.js";
 const globalConfig = new Map();
 
 /**
- * Maps gateway names to their environment variable names.
- */
-const ENV_MAP = {
-  pathao: {
-    clientId: "PATHAO_CLIENT_ID",
-    clientSecret: "PATHAO_CLIENT_SECRET",
-    username: "PATHAO_USERNAME",
-    password: "PATHAO_PASSWORD",
-    sandbox: "PATHAO_SANDBOX",
-  },
-  steadfast: {
-    apiKey: "STEADFAST_API_KEY",
-    secretKey: "STEADFAST_SECRET_KEY",
-    sandbox: "STEADFAST_SANDBOX",
-  },
-
-  paperfly: {
-    username: "PAPERFLY_USERNAME",
-    password: "PAPERFLY_PASSWORD",
-    sandbox: "PAPERFLY_SANDBOX",
-  },
-
-};
-
-/**
- * Required credentials per gateway.
- */
-const REQUIRED_KEYS = {
-  pathao: ["clientId", "clientSecret", "username", "password"],
-  steadfast: ["apiKey", "secretKey"],
-  paperfly: ["username", "password"],
-};
-
-/**
  * Set global credentials for one or more gateways.
  * @param {object} configs - An object keyed by gateway name.
  */
@@ -58,10 +24,9 @@ export function clearConfig() {
 }
 
 /**
- * Read environment variables for a given gateway.
+ * Read environment variables for a given gateway metadata.
  */
-function readEnvConfig(gatewayName) {
-  const envMapping = ENV_MAP[gatewayName];
+function readEnvConfig(envMapping) {
   if (!envMapping) return {};
 
   const envConfig = {};
@@ -79,10 +44,13 @@ function readEnvConfig(gatewayName) {
 }
 
 /**
- * Resolve credentials for a gateway using the three-tier strategy.
+ * Resolve credentials for a gateway using the three-tier strategy dynamically.
  */
-export function resolveConfig(gatewayName, callOptions = {}) {
-  const envConfig = readEnvConfig(gatewayName);
+export function resolveConfig(gatewayName, callOptions = {}, adapterMeta = {}) {
+  const envMapping = adapterMeta.envMap || {};
+  const requiredKeys = adapterMeta.requiredKeys || [];
+
+  const envConfig = readEnvConfig(envMapping);
   const globalCfg = globalConfig.get(gatewayName) || {};
 
   const merged = { ...envConfig, ...globalCfg, ...callOptions };
@@ -91,8 +59,7 @@ export function resolveConfig(gatewayName, callOptions = {}) {
     merged.sandbox = false;
   }
 
-  const required = REQUIRED_KEYS[gatewayName] || [];
-  const missing = required.filter((key) => !merged[key]);
+  const missing = requiredKeys.filter((key) => !merged[key]);
 
   if (missing.length > 0) {
     throw new ConfigurationError(gatewayName, missing);

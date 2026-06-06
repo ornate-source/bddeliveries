@@ -22,7 +22,7 @@ export async function createOrder({ gateway, ...options }) {
   if (typeof adapter.createOrder !== "function") {
     throw new Error(`Gateway "${gateway}" does not support createOrder()`);
   }
-  const config = resolveConfig(gateway, options);
+  const config = resolveConfig(gateway, options, adapter.META);
   return adapter.createOrder(config, options);
 }
 
@@ -39,7 +39,7 @@ export async function trackOrder({ gateway, ...options }) {
   if (typeof adapter.trackOrder !== "function") {
     throw new Error(`Gateway "${gateway}" does not support trackOrder()`);
   }
-  const config = resolveConfig(gateway, options);
+  const config = resolveConfig(gateway, options, adapter.META);
   return adapter.trackOrder(config, options);
 }
 
@@ -56,6 +56,6 @@ export async function cancelOrder({ gateway, ...options }) {
   if (typeof adapter.cancelOrder !== "function") {
     throw new Error(`Gateway "${gateway}" does not support cancelOrder()`);
   }
-  const config = resolveConfig(gateway, options);
+  const config = resolveConfig(gateway, options, adapter.META);
   return adapter.cancelOrder(config, options);
 }

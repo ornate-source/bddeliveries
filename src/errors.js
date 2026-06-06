@@ -26,7 +26,7 @@ export class GatewayNotFoundError extends DeliveryError {
    */
   constructor(gatewayName) {
     super(
-      `Gateway "${gatewayName}" is not supported. Supported gateways: pathao, steadfast, paperfly.`,
+      `Gateway "${gatewayName}" is not supported.`,
       gatewayName,
       "GATEWAY_NOT_FOUND"
     );

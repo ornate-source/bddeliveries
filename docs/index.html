@@ -54,6 +54,7 @@
                     <li><a href="#cancel-order"><i data-lucide="x-circle"></i> Cancel Order</a></li>
                     <li><a href="#error-handling"><i data-lucide="alert-circle"></i> Error Handling</a></li>
                     <li><a href="#typescript"><i data-lucide="code"></i> TypeScript</a></li>
+                    <li><a href="#extending"><i data-lucide="plus-circle"></i> Extending</a></li>
                     <li><a href="#api-reference"><i data-lucide="book-open"></i> API Reference</a></li>
                     <li><a href="#env-variables"><i data-lucide="lock"></i> Env Variables</a></li>
                 </ul>
@@ -329,6 +330,35 @@ const options: CreateOrderOptions = {
 };
 
 const result = await createOrder(options);</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <section id="extending" class="section">
+                <h2><i data-lucide="plus-circle"></i> Extending the Package</h2>
+                <p>The package uses a decentralized Open/Closed architecture. To add a new gateway, you don't need to modify <code>config.js</code> or <code>index.js</code>.</p>
+                <ol>
+                    <li>Create a new file in <code>src/gateways/</code> (e.g., <code>mycourier.js</code>).</li>
+                    <li>Export your gateway's <code>META</code> requirements.</li>
+                    <li>Implement <code>createOrder</code>, <code>trackOrder</code>, and <code>cancelOrder</code> using the shared <code>request</code> utility from <code>src/utils.js</code>.</li>
+                    <li>Register the new file inside <code>src/gateways/index.js</code>.</li>
+                </ol>
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>// src/gateways/mycourier.js
+import { request } from "../utils.js";
+
+export const META = {
+    envMap: {
+        apiKey: "MYCOURIER_API_KEY",
+        sandbox: "MYCOURIER_SANDBOX",
+    },
+    requiredKeys: ["apiKey"],
+};
+
+export async function createOrder(config, options) {
+    // config.apiKey will be automatically resolved by the core package
+    return request('https://api.mycourier.com/order', { ... }, 'mycourier', 'Failed to create');
+}</code></pre>
                     <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
                 </div>
             </section>
