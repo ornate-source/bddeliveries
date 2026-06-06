@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BDDeliveries | Documentation</title>
     <meta name="description"
-        content="Unified delivery gateway package for Node.js — one API for Pathao, Steadfast, eCourier, Paperfly, and DHL.">
+        content="Unified delivery gateway package for Node.js — one API for Pathao, Steadfast, and Paperfly.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -46,9 +46,7 @@
                         <ul class="submenu">
                             <li><a href="#gateway-pathao">Pathao</a></li>
                             <li><a href="#gateway-steadfast">Steadfast</a></li>
-                            <li><a href="#gateway-ecourier">eCourier</a></li>
                             <li><a href="#gateway-paperfly">Paperfly</a></li>
-                            <li><a href="#gateway-dhl">DHL</a></li>
                         </ul>
                     </li>
                     <li><a href="#create-order"><i data-lucide="package-plus"></i> Create Order</a></li>
@@ -82,13 +80,13 @@
             <section id="introduction" class="section">
                 <h1>BDDeliveries</h1>
                 <p class="lead">A unified delivery gateway package for Node.js. One API for
-                    <strong>Pathao</strong>, <strong>Steadfast</strong>, <strong>eCourier</strong>, <strong>Paperfly</strong>, and <strong>DHL</strong>.
+                    <strong>Pathao</strong>, <strong>Steadfast</strong>, and <strong>Paperfly</strong>.
                 </p>
                 <div class="badges">
                     <span class="badge"><i data-lucide="check-circle"></i> Node 18+</span>
                     <span class="badge"><i data-lucide="shield"></i> TypeScript</span>
                     <span class="badge badge-accent"><i data-lucide="zap"></i> Zero Config</span>
-                    <span class="badge badge-green"><i data-lucide="globe"></i> 5 Gateways</span>
+                    <span class="badge badge-green"><i data-lucide="globe"></i> 3 Gateways</span>
                     <span class="badge badge-purple"><i data-lucide="lock"></i> MIT License</span>
                 </div>
                 <p>Designed for developers who need to integrate multiple courier providers without writing
@@ -225,24 +223,10 @@ console.log(tracking.status);  // "in_transit"
                         </div>
                     </div>
                     <div class="gateway-card">
-                        <h4><i data-lucide="truck"></i> eCourier</h4>
-                        <p>Tech-based courier service in Bangladesh.</p>
-                        <div class="gateway-badges">
-                            <span class="badge">API Key/Secret</span>
-                        </div>
-                    </div>
-                    <div class="gateway-card">
                         <h4><i data-lucide="send"></i> Paperfly</h4>
                         <p>High-coverage delivery network.</p>
                         <div class="gateway-badges">
                             <span class="badge">Username/Password</span>
-                        </div>
-                    </div>
-                    <div class="gateway-card">
-                        <h4><i data-lucide="globe"></i> DHL</h4>
-                        <p>International and domestic premium courier.</p>
-                        <div class="gateway-badges">
-                            <span class="badge">API Key</span>
                         </div>
                     </div>
                 </div>
@@ -420,17 +404,9 @@ const result = await createOrder(options);</code></pre>
                                 <td><code>STEADFAST_API_KEY</code>, <code>STEADFAST_SECRET_KEY</code>, <code>STEADFAST_SANDBOX</code></td>
                             </tr>
                             <tr>
-                                <td>eCourier</td>
-                                <td><code>ECOURIER_API_KEY</code>, <code>ECOURIER_API_SECRET</code>, <code>ECOURIER_USER_ID</code>, <code>ECOURIER_SANDBOX</code></td>
-                            </tr>
-                            <tr>
                                 <td>Paperfly</td>
                                 <td><code>PAPERFLY_USERNAME</code>, <code>PAPERFLY_PASSWORD</code>, <code>PAPERFLY_SANDBOX</code></td>
-                            </tr>
-                            <tr>
-                                <td>DHL</td>
-                                <td><code>DHL_API_KEY</code>, <code>DHL_API_SECRET</code>, <code>DHL_ACCOUNT_NUMBER</code>, <code>DHL_SANDBOX</code></td>
-                            </tr>
+                             </tr>
                         </tbody>
                     </table>
                 </div>

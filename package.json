@@ -1,7 +1,7 @@
 {
   "name": "bddeliveries",
   "version": "1.0.0",
-  "description": "Centralized delivery gateway abstraction for Pathao, RedX, Steadfast, eCourier, Paperfly, and DHL.",
+  "description": "Centralized delivery gateway abstraction for Pathao, Steadfast, and Paperfly.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "type": "module",
@@ -21,9 +21,7 @@
     "courier",
     "pathao",
     "steadfast",
-    "ecourier",
     "paperfly",
-    "dhl",
     "bangladesh"
   ]
 }

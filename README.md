@@ -1,6 +1,6 @@
 # BDDeliveries
 
-Centralized delivery gateway abstraction for Bangladeshi couriers including Pathao, Steadfast, eCourier, Paperfly, and DHL.
+Centralized delivery gateway abstraction for Bangladeshi couriers including Pathao, Steadfast, and Paperfly.
 
 ## Features
 

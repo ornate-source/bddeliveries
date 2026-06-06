@@ -6,9 +6,7 @@ import { GatewayNotFoundError } from "../errors.js";
 const gateways = {
   pathao: () => import("./pathao.js"),
   steadfast: () => import("./steadfast.js"),
-  ecourier: () => import("./ecourier.js"),
   paperfly: () => import("./paperfly.js"),
-  dhl: () => import("./dhl.js"),
 };
 
 /**

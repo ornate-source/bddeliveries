@@ -20,7 +20,7 @@ export class ConfigurationError extends DeliveryError {
 export function getSupportedGateways(): string[];
 
 export interface BaseOptions {
-  gateway: 'pathao' | 'steadfast' | 'ecourier' | 'paperfly' | 'dhl' | string;
+  gateway: 'pathao' | 'steadfast' | 'paperfly' | string;
   [key: string]: any;
 }
 

@@ -22,23 +22,13 @@ const ENV_MAP = {
     secretKey: "STEADFAST_SECRET_KEY",
     sandbox: "STEADFAST_SANDBOX",
   },
-  ecourier: {
-    apiKey: "ECOURIER_API_KEY",
-    apiSecret: "ECOURIER_API_SECRET",
-    userId: "ECOURIER_USER_ID",
-    sandbox: "ECOURIER_SANDBOX",
-  },
+
   paperfly: {
     username: "PAPERFLY_USERNAME",
     password: "PAPERFLY_PASSWORD",
     sandbox: "PAPERFLY_SANDBOX",
   },
-  dhl: {
-    apiKey: "DHL_API_KEY",
-    apiSecret: "DHL_API_SECRET",
-    accountNumber: "DHL_ACCOUNT_NUMBER",
-    sandbox: "DHL_SANDBOX",
-  },
+
 };
 
 /**
@@ -47,9 +37,7 @@ const ENV_MAP = {
 const REQUIRED_KEYS = {
   pathao: ["clientId", "clientSecret", "username", "password"],
   steadfast: ["apiKey", "secretKey"],
-  ecourier: ["apiKey", "apiSecret", "userId"],
   paperfly: ["username", "password"],
-  dhl: ["apiKey", "apiSecret", "accountNumber"],
 };
 
 /**
