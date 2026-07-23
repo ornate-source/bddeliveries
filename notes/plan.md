@@ -50,9 +50,9 @@ differs from the snippet in the detailed finding below, the code is authoritativ
 | 2 | 🔴 Critical | pathao | Address is space-padded to fake Pathao's 10-char minimum | `pathao.js:194` `requireLength()` | `pathao.test.js` — "rejects a short address instead of padding it" |
 | 3 | 🔴 Critical | steadfast | `cancelOrder()` reports `"cancelled"` after **zero** network calls | `steadfast.js:283` | `steadfast.test.js` — "does not claim an order was cancelled" |
 | 4 | 🔴 Critical | steadfast, pathao | Unencoded path params — an invoice can redirect the request to another endpoint | `utils.js:78` `pathSegment()`, 6 call sites | `steadfast.test.js` — "encodes invoice numbers into a single path segment"; `pathao.test.js` — same for tracking ids |
-| 5 | 🔴 Critical | http | `request()` throws a raw `TypeError` on `null` error bodies, escaping `DeliveryError` | `utils.js:180` + `extractErrorMessage` at `:95` | `request.test.js` — "wraps a null error body as a DeliveryError", "handles an errors field that is a string" |
-| 6 | 🔴 Critical | registry | `getGateway("constructor")` resolves to `{}` and poisons the cache | `gateways/index.js:12,32` | `index.test.js` — "rejects inherited Object.prototype keys", "rejects non-string gateway names" |
-| 7 | 🟠 High | http | No request timeout — a hung courier API hangs the caller forever | `utils.js:131` `attempt()` | `request.test.js` — "aborts a slow request", "honours a caller-supplied AbortSignal" |
+| 5 | 🔴 Critical | http | `request()` throws a raw `TypeError` on `null` error bodies, escaping `DeliveryError` | `utils.js:205,221` + `extractErrorMessage` at `:95` | `request.test.js` — "wraps a null error body as a DeliveryError", "handles an errors field that is a string" |
+| 6 | 🔴 Critical | registry | `getGateway("constructor")` resolves to `{}` and poisons the cache | `gateways/index.js:9,33` | `index.test.js` — "rejects inherited Object.prototype keys", "rejects non-string gateway names" |
+| 7 | 🟠 High | http | No request timeout — a hung courier API hangs the caller forever | `utils.js:133` `attempt()` | `request.test.js` — "aborts a slow request", "honours a caller-supplied AbortSignal" |
 | 8 | 🟠 High | http | Network errors unwrapped; no retry on transient failures | `utils.js:245` `request()` | `request.test.js` — "wraps a network failure as NETWORK_ERROR", "does not retry a POST" |
 | 9 | 🟠 High | pathao | Re-authenticates on every call — 3 orders → 3 token requests | `pathao.js:101` `getAccessToken()` | `pathao.test.js` — "reuses a cached access token", "de-duplicates concurrent token grants", "does not share a cached token between two merchants" |
 | 10 | 🟠 High | errors | `originalError` accepted at 20+ throw sites, populated at none | `errors.js:44` | `index.test.js` — "preserves the original error as cause", "error subclasses report their own name" |
@@ -60,11 +60,11 @@ differs from the snippet in the detailed finding below, the code is authoritativ
 | 12 | 🟠 High | docs | `docs/index.md` example uses field names no adapter reads | `docs/index.md` rewritten | `hygiene.test.js` — "docs use field names the adapters actually read" |
 | 13 | 🟠 High | pathao | Library writes to `console.error` and swallows the failure | `pathao.js:155` `getStores()` | `hygiene.test.js` — "no console.* calls in src/" |
 | 14 | 🟡 Medium | api | 8 Steadfast functions unreachable through the public API | `index.js:96` `callGateway()` | `steadfast.test.js` — "callGateway exposes gateway-specific operations", "rejects a method outside the allow-list" |
-| 15 | 🟡 Medium | index | `does not support X()` throws a bare `Error`, not a `DeliveryError` | `index.js:41` `runOperation()` | `index.test.js` — "throws DeliveryError, not a bare Error, for an unsupported operation" |
+| 15 | 🟡 Medium | index | `does not support X()` throws a bare `Error`, not a `DeliveryError` | `index.js:44` `runOperation()` | `index.test.js` — "throws DeliveryError, not a bare Error, for an unsupported operation" |
 | 16 | 🟡 Medium | utils | Phone normalization applied to 1 of 3 gateways, and incomplete | `utils.js:47` + all 3 adapters | `request.test.js` — "normalizes every Bangladeshi country-code form", "rejects a number that is not a Bangladeshi mobile" |
 | 17 | 🟡 Medium | config | Global mutable singleton — no multi-tenant isolation, `configure(null)` throws `TypeError` | `config.js:35`, `index.js:162` `DeliveryClient` | `index.test.js` — "two clients keep their credentials isolated", "configure rejects non-object input" |
 | 18 | 🟡 Medium | pkg | No `files` / `exports` — `docs/`, `tests/` publish; every internal path is public API | `package.json` `files`/`exports` | CI `npm pack --dry-run` leak check |
-| 19 | 🟡 Medium | types | Everything returns `Promise<any>`; index signature defeats excess-property checks | `index.d.ts` rewritten | `types.check.ts` — 8 `@ts-expect-error` cases via `tsc --noEmit` |
+| 19 | 🟡 Medium | types | Everything returns `Promise<any>`; index signature defeats excess-property checks | `index.d.ts` rewritten | `types.check.ts` — 11 `@ts-expect-error` cases via `tsc --noEmit` |
 | 20 | 🟡 Medium | all | Status normalization differs per gateway; Pathao leaks raw provider strings | `status.js` + all 3 adapters | all three adapter suites — "maps provider statuses onto the canonical vocabulary", "reports unknown for an unrecognized provider status" |
 | 21 | 🟡 Medium | security | Paperfly ships a hardcoded API key; no redaction of credentials in errors | `paperfly.js:15` META, `errors.js:28` `redact()` | `paperfly.test.js` — "requires paperflyKey rather than falling back"; `index.test.js` — "serializing an error does not leak credentials" |
 | 22 | 🟢 Low | tests | ~2% coverage; state leaks between tests; dead try/catch in the mock | `tests/` rebuilt, `helpers/mock-fetch.js` | 2 → 87 tests |
@@ -295,7 +295,7 @@ url = `${BASE_URL}/status_by_invoice/${pathSegment("steadfast", "invoice", optio
 
 ### 5. 🔴 `request()` throws a raw `TypeError` on `null` error bodies — ✅ FIXED
 
-> **Fixed in v1.1.0.** `src/utils.js:180` — `null`/non-object bodies normalized; `extractErrorMessage()` at `:95` shared with `pathao.js:59`.
+> **Fixed in v1.1.0.** `src/utils.js:205,221` — `null`/non-object bodies normalized; `extractErrorMessage()` at `:95`, shared with `pathao.js:59`.
 
 `src/utils.js:45-50`
 
@@ -342,7 +342,7 @@ Use it in the `!response.ok` branch **and** at `pathao.js:26`, which carries the
 
 ### 6. 🔴 Gateway registry resolves inherited `Object.prototype` keys — ✅ FIXED
 
-> **Fixed in v1.1.0.** `src/gateways/index.js:12` — null-prototype registry + `Object.hasOwn`, and the cache now stores the import promise.
+> **Fixed in v1.1.0.** `src/gateways/index.js:9` — null-prototype registry + `Object.hasOwn`, and the cache now stores the import promise.
 
 `src/gateways/index.js:6, 28`
 
@@ -393,7 +393,7 @@ optional chaining returning `undefined` by accident.
 
 ### 7. 🟠 No request timeout — ✅ FIXED
 
-> **Fixed in v1.1.0.** `src/utils.js:131` — 15s default, per-gateway `timeoutMs`, `TIMEOUT`/`ABORTED` codes, caller `AbortSignal` honoured.
+> **Fixed in v1.1.0.** `src/utils.js:133` — 15s default, per-gateway `timeoutMs`, `TIMEOUT`/`ABORTED` codes, caller `AbortSignal` honoured.
 
 `src/utils.js:30` — `await fetch(url, options)` with no `AbortSignal`. Node's fetch has
 **no default timeout**. A courier API that accepts the TCP connection and never responds
@@ -681,7 +681,7 @@ Document the capability matrix per gateway, and resolve this **before** #18 adds
 
 ### 15. 🟡 Unsupported-operation errors are bare `Error`s — ✅ FIXED
 
-> **Fixed in v1.1.0.** `src/index.js:41` `runOperation()` — the three duplicated method bodies collapsed into one factory.
+> **Fixed in v1.1.0.** `src/index.js:44` `runOperation()` — the three duplicated method bodies collapsed into one factory.
 
 `src/index.js:23, 40, 57`
 
@@ -1200,7 +1200,7 @@ npm run check        # 87 pass, 0 fail; tsc --noEmit clean
 npm pack --dry-run   # 15 files, no docs/ tests/ notes/ leakage
 ```
 
-The eight `@ts-expect-error` cases in `tests/types.check.ts` compile-fail as intended,
+The eleven `@ts-expect-error` cases in `tests/types.check.ts` compile-fail as intended,
 which is what proves #19 is really fixed — dropping the `[key: string]: any` index
 signature from the per-gateway option types is what makes a cross-gateway field an error,
 and an unused `@ts-expect-error` is itself a compile error, so they cannot silently rot.
