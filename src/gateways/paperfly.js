@@ -1,137 +1,199 @@
-import { DeliveryError } from "../errors.js";
-import { request } from "../utils.js";
+import { DeliveryError, ConfigurationError } from "../errors.js";
+import {
+  request,
+  normalizePhone,
+  pick,
+  httpOptions,
+  extractErrorMessage,
+  isObject,
+} from "../utils.js";
+import { requireFields, toNumber, formatAmount } from "../validation.js";
+import { STATUS, mapPaperflyStatus } from "../status.js";
 
-const BASE_URL = "https://api.paperfly.com.bd";
+const PRODUCTION_URL = "https://api.paperfly.com.bd";
 
 export const META = {
-    envMap: {
-        username: "PAPERFLY_USERNAME",
-        password: "PAPERFLY_PASSWORD",
-        sandbox: "PAPERFLY_SANDBOX",
-    },
-    requiredKeys: ["username", "password"],
+  envMap: {
+    username: "PAPERFLY_USERNAME",
+    password: "PAPERFLY_PASSWORD",
+    paperflyKey: "PAPERFLY_KEY",
+    sandbox: "PAPERFLY_SANDBOX",
+  },
+  // paperflyKey is required rather than defaulted: the previous hardcoded fallback meant
+  // a misconfigured merchant silently authenticated as somebody else.
+  requiredKeys: ["username", "password", "paperflyKey"],
+  capabilities: ["createOrder", "trackOrder", "cancelOrder"],
 };
 
-function getBasicAuth(config) {
-    if (!config.username || !config.password) {
-        throw new DeliveryError("Username and password are required for Paperfly", "paperfly", "MISSING_PARAM");
-    }
-    const credentials = `${config.username}:${config.password}`;
-    const base64 = typeof btoa === "function" ? btoa(credentials) : Buffer.from(credentials).toString("base64");
-    return "Basic " + base64;
+/**
+ * Paperfly publishes no sandbox host. Reject `sandbox: true` rather than quietly
+ * sending live parcels while the caller believes they are testing.
+ */
+function getBaseUrl(config) {
+  if (config.baseUrl) return String(config.baseUrl).replace(/\/+$/, "");
+  if (config.sandbox) {
+    throw new ConfigurationError(
+      "paperfly",
+      "Paperfly has no public sandbox host. Set `baseUrl` to your test endpoint, " +
+        "or remove `sandbox` to use production."
+    );
+  }
+  return PRODUCTION_URL;
 }
 
+function getBasicAuth(config) {
+  const credentials = `${config.username}:${config.password}`;
+  const base64 =
+    typeof btoa === "function" ? btoa(credentials) : Buffer.from(credentials).toString("base64");
+  return "Basic " + base64;
+}
+
+/** Every Paperfly call uses the same headers — including cancelOrder, which did not. */
 function getHeaders(config) {
-    return {
-        Authorization: getBasicAuth(config),
-        paperflykey: config.paperflyKey || "Paperfly_~La?Rj73FcLm",
-        "Content-Type": "application/json",
-    };
+  return {
+    Authorization: getBasicAuth(config),
+    paperflykey: config.paperflyKey,
+    "Content-Type": "application/json",
+  };
+}
+
+/** Paperfly reports logical failures inside a 200 response; check them uniformly. */
+function assertPaperflyOk(data, contextMessage) {
+  const code = String(data?.response_code ?? data?.success?.response_code ?? "");
+  if (code !== "200") {
+    const error = new DeliveryError(
+      extractErrorMessage(data, contextMessage),
+      "paperfly",
+      "API_ERROR"
+    );
+    error.responseBody = isObject(data) ? data : undefined;
+    throw error;
+  }
+  return data;
+}
+
+async function paperflyRequest(url, fetchOptions, contextMessage, config) {
+  const data = await request(url, fetchOptions, "paperfly", contextMessage, httpOptions(config));
+  return assertPaperflyOk(data, contextMessage);
 }
 
 export async function createOrder(config, options) {
-    try {
-        const reference = options.invoice || options.merchantOrderReference;
-        if (!reference) {
-            throw new DeliveryError("invoice or merchantOrderReference is required", "paperfly", "MISSING_PARAM");
-        }
+  const fields = {
+    merchantOrderReference: pick(options, "invoice", "merchantOrderReference"),
+    customerName: pick(options, "recipientName", "recipient_name", "customerName"),
+    customerPhone: pick(options, "recipientPhone", "recipient_phone", "customerPhone"),
+    customerAddress: pick(options, "recipientAddress", "recipient_address", "customerAddress"),
+  };
 
-        const payload = {
-            merchantOrderReference: reference,
-            storeName: options.storeName || "",
-            productBrief: options.item_description || options.productBrief || "Product",
-            packagePrice: options.cod_amount?.toString() || options.packagePrice || "0",
-            max_weight: options.max_weight?.toString() || "0.5",
-            customerName: options.recipient_name || options.customerName || "Customer",
-            customerAddress: options.recipient_address || options.customerAddress || "",
-            customerPhone: options.recipient_phone || options.customerPhone || "",
-        };
+  requireFields("paperfly", fields, [
+    "merchantOrderReference",
+    "customerName",
+    "customerPhone",
+    "customerAddress",
+  ]);
 
-        const data = await request(`${BASE_URL}/merchant/api/service/new_order_v2.php`, {
-            method: "POST",
-            headers: getHeaders(config),
-            body: JSON.stringify(payload),
-        }, "paperfly", "Failed to create order");
+  const packagePrice = pick(options, "codAmount", "cod_amount", "packagePrice");
+  const maxWeight = pick(options, "maxWeight", "max_weight", "itemWeight", "item_weight");
 
-        if (String(data.response_code) !== "200") {
-            throw new DeliveryError(data.error?.message || data.success?.message || "Failed to create order", "paperfly", "API_ERROR");
-        }
+  const payload = {
+    merchantOrderReference: String(fields.merchantOrderReference),
+    storeName: pick(options, "storeName", "store_name") ?? "",
+    productBrief:
+      pick(options, "itemDescription", "item_description", "productBrief") ?? "Product",
+    packagePrice: formatAmount(
+      toNumber("paperfly", "packagePrice", packagePrice, { fallback: 0, min: 0 })
+    ),
+    max_weight: String(
+      toNumber("paperfly", "max_weight", maxWeight, { fallback: 0.5, min: 0 })
+    ),
+    customerName: String(fields.customerName).trim(),
+    customerAddress: String(fields.customerAddress).trim(),
+    customerPhone: normalizePhone(fields.customerPhone, {
+      gateway: "paperfly",
+      field: "customerPhone",
+    }),
+  };
 
-        return {
-            gateway: "paperfly",
-            status: "created",
-            trackingId: reference,
-            providerTrackingNumber: data.success?.tracking_number,
-            raw: data,
-        };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "paperfly", "API_ERROR");
-    }
+  const data = await paperflyRequest(
+    `${getBaseUrl(config)}/merchant/api/service/new_order_v2.php`,
+    { method: "POST", headers: getHeaders(config), body: JSON.stringify(payload) },
+    "Failed to create order",
+    config
+  );
+
+  return {
+    gateway: "paperfly",
+    status: STATUS.PENDING,
+    providerStatus: null,
+    trackingId: payload.merchantOrderReference,
+    providerTrackingNumber: data?.success?.tracking_number,
+    raw: data,
+  };
 }
 
 export async function trackOrder(config, options) {
-    if (!options.trackingId) {
-        throw new DeliveryError("trackingId (ReferenceNumber) is required for trackOrder", "paperfly", "MISSING_PARAM");
-    }
+  const trackingId = pick(options, "trackingId", "invoice", "merchantOrderReference");
+  if (!trackingId) {
+    throw new DeliveryError(
+      "trackingId (ReferenceNumber) is required for trackOrder",
+      "paperfly",
+      "MISSING_PARAM"
+    );
+  }
 
-    try {
-        const data = await request(`${BASE_URL}/API-Order-Tracking`, {
-            method: "POST",
-            headers: getHeaders(config),
-            body: JSON.stringify({ ReferenceNumber: options.trackingId }),
-        }, "paperfly", "Failed to track order");
+  const data = await paperflyRequest(
+    `${getBaseUrl(config)}/API-Order-Tracking`,
+    {
+      method: "POST",
+      headers: getHeaders(config),
+      body: JSON.stringify({ ReferenceNumber: String(trackingId) }),
+    },
+    "Failed to track order",
+    config
+  );
 
-        if (String(data.response_code) !== "200") {
-            throw new DeliveryError(data.error?.message || data.success?.message || "Failed to track order", "paperfly", "API_ERROR");
-        }
+  const { status, providerStatus } = mapPaperflyStatus(data?.success?.trackingStatus?.[0] ?? {});
 
-        const statusData = data.success?.trackingStatus?.[0] || {};
-        let status = "processing";
-        if (statusData.Delivered) status = "delivered";
-        else if (statusData.Returned) status = "returned";
-        else if (statusData.inTransit) status = "in_transit";
-        else if (statusData.Pick) status = "picked_up";
-
-        return {
-            gateway: "paperfly",
-            status,
-            trackingId: options.trackingId,
-            raw: data,
-        };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "paperfly", "API_ERROR");
-    }
+  return {
+    gateway: "paperfly",
+    status,
+    providerStatus,
+    trackingId: String(trackingId),
+    raw: data,
+  };
 }
 
+/**
+ * ⚠️ Unverified against current Paperfly documentation. The endpoint shape differs from
+ * its siblings (`/api/v1/...` vs `/merchant/api/service/*.php`), which suggests it was
+ * written against a different API version. Confirm before relying on it.
+ */
 export async function cancelOrder(config, options) {
-    if (!options.trackingId) {
-        throw new DeliveryError("trackingId (order_id) is required for cancelOrder", "paperfly", "MISSING_PARAM");
-    }
+  const trackingId = pick(options, "trackingId", "orderId", "order_id");
+  if (!trackingId) {
+    throw new DeliveryError(
+      "trackingId (order_id) is required for cancelOrder",
+      "paperfly",
+      "MISSING_PARAM"
+    );
+  }
 
-    try {
-        const data = await request(`${BASE_URL}/api/v1/cancel-order`, {
-            method: "POST",
-            headers: {
-                Authorization: getBasicAuth(config),
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ order_id: options.trackingId }),
-        }, "paperfly", "Failed to cancel order");
+  const data = await paperflyRequest(
+    `${getBaseUrl(config)}/api/v1/cancel-order`,
+    {
+      method: "POST",
+      headers: getHeaders(config),
+      body: JSON.stringify({ order_id: String(trackingId) }),
+    },
+    "Failed to cancel order",
+    config
+  );
 
-        if (String(data.response_code) !== "200" && String(data.success?.response_code) !== "200") {
-            throw new DeliveryError(data.error?.message || data.success?.message || "Failed to cancel order", "paperfly", "API_ERROR");
-        }
-
-        return {
-            gateway: "paperfly",
-            status: "cancelled",
-            trackingId: options.trackingId,
-            raw: data,
-        };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "paperfly", "API_ERROR");
-    }
+  return {
+    gateway: "paperfly",
+    status: STATUS.CANCELLED,
+    providerStatus: null,
+    trackingId: String(trackingId),
+    raw: data,
+  };
 }

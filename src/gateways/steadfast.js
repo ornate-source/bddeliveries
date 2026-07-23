@@ -1,199 +1,290 @@
-import { DeliveryError } from "../errors.js";
-import { request } from "../utils.js";
+import { DeliveryError, ConfigurationError } from "../errors.js";
+import {
+  request,
+  normalizePhone,
+  pathSegment,
+  pick,
+  httpOptions,
+  extractErrorMessage,
+  isObject,
+} from "../utils.js";
+import { requireFields, requireOneOf, toNumber, formatAmount } from "../validation.js";
+import { STATUS, STEADFAST_STATUS, mapStatus } from "../status.js";
 
-const BASE_URL = "https://portal.packzy.com/api/v1";
+const PRODUCTION_URL = "https://portal.packzy.com/api/v1";
 
 export const META = {
-    envMap: {
-        apiKey: "STEADFAST_API_KEY",
-        secretKey: "STEADFAST_SECRET_KEY",
-        sandbox: "STEADFAST_SANDBOX",
-    },
-    requiredKeys: ["apiKey", "secretKey"],
+  envMap: {
+    apiKey: "STEADFAST_API_KEY",
+    secretKey: "STEADFAST_SECRET_KEY",
+    sandbox: "STEADFAST_SANDBOX",
+  },
+  requiredKeys: ["apiKey", "secretKey"],
+  capabilities: [
+    "createOrder",
+    "trackOrder",
+    "createBulkOrder",
+    "getBalance",
+    "createReturnRequest",
+    "getReturnRequest",
+    "getReturnRequests",
+    "getPayments",
+    "getPayment",
+    "getPoliceStations",
+  ],
 };
 
-function getHeaders(config, isJson = true) {
-    const headers = {
-        "Api-Key": config.apiKey,
-        "Secret-Key": config.secretKey,
-    };
-    if (isJson) headers["Content-Type"] = "application/json";
-    return headers;
+/**
+ * Steadfast publishes no sandbox host. Rather than accepting `sandbox: true` and
+ * silently sending live parcels, reject it and point at `baseUrl`.
+ */
+function getBaseUrl(config) {
+  if (config.baseUrl) return String(config.baseUrl).replace(/\/+$/, "");
+  if (config.sandbox) {
+    throw new ConfigurationError(
+      "steadfast",
+      "Steadfast has no public sandbox host. Set `baseUrl` to your test endpoint, " +
+        "or remove `sandbox` to use production."
+    );
+  }
+  return PRODUCTION_URL;
 }
 
+function getHeaders(config, isJson = true) {
+  const headers = {
+    "Api-Key": config.apiKey,
+    "Secret-Key": config.secretKey,
+  };
+  if (isJson) headers["Content-Type"] = "application/json";
+  return headers;
+}
+
+async function steadfastRequest(url, fetchOptions, contextMessage, config) {
+  const data = await request(url, fetchOptions, "steadfast", contextMessage, httpOptions(config));
+
+  // Steadfast returns 200 OK with a non-200 `status` field for logical failures.
+  if (isObject(data) && data.status !== undefined && Number(data.status) !== 200) {
+    const error = new DeliveryError(
+      extractErrorMessage(data, contextMessage),
+      "steadfast",
+      Number(data.status) === 404 ? "NOT_FOUND" : "API_ERROR"
+    );
+    error.responseBody = data;
+    throw error;
+  }
+  return data;
+}
+
+/** GET helper — these are all idempotent and safe to retry. */
+const get = (config, path, contextMessage) =>
+  steadfastRequest(
+    `${getBaseUrl(config)}${path}`,
+    { method: "GET", headers: getHeaders(config, false) },
+    contextMessage,
+    config
+  );
+
 export async function createOrder(config, options) {
-    try {
-        const data = await request(`${BASE_URL}/create_order`, {
-            method: "POST",
-            headers: getHeaders(config),
-            body: JSON.stringify({
-                invoice: options.invoice,
-                recipient_name: options.recipient_name,
-                recipient_phone: options.recipient_phone,
-                alternative_phone: options.alternative_phone,
-                recipient_email: options.recipient_email,
-                recipient_address: options.recipient_address,
-                cod_amount: options.cod_amount,
-                note: options.note,
-                item_description: options.item_description,
-                total_lot: options.total_lot,
-                delivery_type: options.delivery_type,
-            }),
-        }, "steadfast", "Failed to create order");
+  const fields = {
+    invoice: pick(options, "invoice", "merchantOrderId", "merchant_order_id"),
+    recipient_name: pick(options, "recipientName", "recipient_name"),
+    recipient_phone: pick(options, "recipientPhone", "recipient_phone"),
+    recipient_address: pick(options, "recipientAddress", "recipient_address"),
+    cod_amount: pick(options, "codAmount", "cod_amount"),
+  };
 
-        if (data.status !== 200) {
-            throw new DeliveryError(data.message || "Failed to create order", "steadfast", "API_ERROR");
-        }
+  requireFields("steadfast", fields, [
+    "invoice",
+    "recipient_name",
+    "recipient_phone",
+    "recipient_address",
+  ]);
 
-        return {
-            gateway: "steadfast",
-            status: "created",
-            trackingId: data.consignment?.consignment_id?.toString() || data.consignment?.tracking_code,
-            raw: data,
-        };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const alternativePhone = pick(options, "alternativePhone", "alternative_phone");
+
+  const payload = {
+    invoice: String(fields.invoice),
+    recipient_name: String(fields.recipient_name).trim(),
+    recipient_phone: normalizePhone(fields.recipient_phone, {
+      gateway: "steadfast",
+      field: "recipient_phone",
+    }),
+    recipient_address: String(fields.recipient_address).trim(),
+    cod_amount: formatAmount(
+      toNumber("steadfast", "cod_amount", fields.cod_amount, { fallback: 0, min: 0 })
+    ),
+  };
+
+  if (alternativePhone !== undefined) {
+    payload.alternative_phone = normalizePhone(alternativePhone, {
+      gateway: "steadfast",
+      field: "alternative_phone",
+    });
+  }
+
+  const optional = {
+    recipient_email: pick(options, "recipientEmail", "recipient_email"),
+    note: pick(options, "note"),
+    item_description: pick(options, "itemDescription", "item_description"),
+    total_lot: pick(options, "totalLot", "total_lot"),
+    delivery_type: pick(options, "deliveryType", "delivery_type"),
+  };
+  for (const [key, value] of Object.entries(optional)) {
+    if (value !== undefined) payload[key] = value;
+  }
+
+  const data = await steadfastRequest(
+    `${getBaseUrl(config)}/create_order`,
+    { method: "POST", headers: getHeaders(config), body: JSON.stringify(payload) },
+    "Failed to create order",
+    config
+  );
+
+  return {
+    gateway: "steadfast",
+    status: STATUS.PENDING,
+    providerStatus: data?.consignment?.status ?? null,
+    trackingId:
+      data?.consignment?.consignment_id?.toString() || data?.consignment?.tracking_code,
+    trackingCode: data?.consignment?.tracking_code,
+    raw: data,
+  };
 }
 
 export async function createBulkOrder(config, options) {
-    if (!options.data || !Array.isArray(options.data)) {
-        throw new DeliveryError("data array is required for createBulkOrder", "steadfast", "MISSING_PARAM");
-    }
-    try {
-        const data = await request(`${BASE_URL}/create_order/bulk-order`, {
-            method: "POST",
-            headers: getHeaders(config),
-            body: JSON.stringify({ data: options.data }),
-        }, "steadfast", "Failed to create bulk order");
+  if (!Array.isArray(options.data)) {
+    throw new DeliveryError(
+      "data array is required for createBulkOrder",
+      "steadfast",
+      "MISSING_PARAM"
+    );
+  }
 
-        return { gateway: "steadfast", raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const data = await steadfastRequest(
+    `${getBaseUrl(config)}/create_order/bulk-order`,
+    { method: "POST", headers: getHeaders(config), body: JSON.stringify({ data: options.data }) },
+    "Failed to create bulk order",
+    config
+  );
+
+  return { gateway: "steadfast", raw: data };
 }
 
 export async function trackOrder(config, options) {
-    let url;
-    let identifier;
+  const trackingId = pick(options, "trackingId", "consignment_id");
+  const invoice = pick(options, "invoice");
+  const trackingCode = pick(options, "trackingCode", "tracking_code");
 
-    if (options.trackingId) {
-        url = `${BASE_URL}/status_by_cid/${options.trackingId}`;
-        identifier = options.trackingId;
-    } else if (options.invoice) {
-        url = `${BASE_URL}/status_by_invoice/${options.invoice}`;
-        identifier = options.invoice;
-    } else if (options.trackingCode) {
-        url = `${BASE_URL}/status_by_trackingcode/${options.trackingCode}`;
-        identifier = options.trackingCode;
-    } else {
-        throw new DeliveryError("trackingId, invoice, or trackingCode is required for trackOrder", "steadfast", "MISSING_PARAM");
-    }
+  requireOneOf("steadfast", { trackingId, invoice, trackingCode }, [
+    "trackingId",
+    "invoice",
+    "trackingCode",
+  ]);
 
-    try {
-        const data = await request(url, { headers: getHeaders(config, false) }, "steadfast", "Failed to track order");
+  let path;
+  let identifier;
+  if (trackingId) {
+    identifier = trackingId;
+    path = `/status_by_cid/${pathSegment("steadfast", "trackingId", trackingId)}`;
+  } else if (invoice) {
+    identifier = invoice;
+    path = `/status_by_invoice/${pathSegment("steadfast", "invoice", invoice)}`;
+  } else {
+    identifier = trackingCode;
+    path = `/status_by_trackingcode/${pathSegment("steadfast", "trackingCode", trackingCode)}`;
+  }
 
-        if (data.status === 404 || !data.delivery_status) {
-            throw new DeliveryError(data.message || "Tracking not found", "steadfast", "NOT_FOUND");
-        }
+  const data = await get(config, path, "Failed to track order");
 
-        return {
-            gateway: "steadfast",
-            status: data.delivery_status,
-            trackingId: identifier,
-            raw: data,
-        };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  if (!data?.delivery_status) {
+    throw new DeliveryError(
+      extractErrorMessage(data, "Tracking information not found"),
+      "steadfast",
+      "NOT_FOUND"
+    );
+  }
+
+  return {
+    gateway: "steadfast",
+    status: mapStatus(STEADFAST_STATUS, data.delivery_status),
+    providerStatus: data.delivery_status,
+    trackingId: String(identifier),
+    raw: data,
+  };
 }
 
 export async function getBalance(config) {
-    try {
-        const data = await request(`${BASE_URL}/get_balance`, { headers: getHeaders(config, false) }, "steadfast", "Failed to get balance");
-        return { gateway: "steadfast", balance: data.current_balance, raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const data = await get(config, "/get_balance", "Failed to get balance");
+  return { gateway: "steadfast", balance: data?.current_balance, raw: data };
 }
 
 export async function createReturnRequest(config, options) {
-    try {
-        const data = await request(`${BASE_URL}/create_return_request`, {
-            method: "POST",
-            headers: getHeaders(config),
-            body: JSON.stringify({
-                consignment_id: options.consignment_id,
-                invoice: options.invoice,
-                tracking_code: options.tracking_code,
-                reason: options.reason,
-            }),
-        }, "steadfast", "Failed to create return request");
+  const consignmentId = pick(options, "consignmentId", "consignment_id", "trackingId");
+  const invoice = pick(options, "invoice");
+  const trackingCode = pick(options, "trackingCode", "tracking_code");
 
-        return { gateway: "steadfast", raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  requireOneOf("steadfast", { consignmentId, invoice, trackingCode }, [
+    "consignmentId",
+    "invoice",
+    "trackingCode",
+  ]);
+
+  const payload = {};
+  if (consignmentId !== undefined) payload.consignment_id = consignmentId;
+  if (invoice !== undefined) payload.invoice = invoice;
+  if (trackingCode !== undefined) payload.tracking_code = trackingCode;
+  if (options.reason !== undefined) payload.reason = options.reason;
+
+  const data = await steadfastRequest(
+    `${getBaseUrl(config)}/create_return_request`,
+    { method: "POST", headers: getHeaders(config), body: JSON.stringify(payload) },
+    "Failed to create return request",
+    config
+  );
+
+  return { gateway: "steadfast", raw: data };
 }
 
 export async function getReturnRequest(config, options) {
-    if (!options.id) throw new DeliveryError("id is required", "steadfast", "MISSING_PARAM");
-    try {
-        const data = await request(`${BASE_URL}/get_return_request/${options.id}`, { headers: getHeaders(config, false) }, "steadfast", "Failed to get return request");
-        return { gateway: "steadfast", raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const id = pathSegment("steadfast", "id", pick(options, "id"));
+  const data = await get(config, `/get_return_request/${id}`, "Failed to get return request");
+  return { gateway: "steadfast", raw: data };
 }
 
 export async function getReturnRequests(config) {
-    try {
-        const data = await request(`${BASE_URL}/get_return_requests`, { headers: getHeaders(config, false) }, "steadfast", "Failed to get return requests");
-        return { gateway: "steadfast", raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const data = await get(config, "/get_return_requests", "Failed to get return requests");
+  return { gateway: "steadfast", raw: data };
 }
 
 export async function getPayments(config) {
-    try {
-        const data = await request(`${BASE_URL}/payments`, { headers: getHeaders(config, false) }, "steadfast", "Failed to get payments");
-        return { gateway: "steadfast", raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const data = await get(config, "/payments", "Failed to get payments");
+  return { gateway: "steadfast", raw: data };
 }
 
 export async function getPayment(config, options) {
-    if (!options.payment_id) throw new DeliveryError("payment_id is required", "steadfast", "MISSING_PARAM");
-    try {
-        const data = await request(`${BASE_URL}/payments/${options.payment_id}`, { headers: getHeaders(config, false) }, "steadfast", "Failed to get payment");
-        return { gateway: "steadfast", raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const id = pathSegment("steadfast", "payment_id", pick(options, "paymentId", "payment_id"));
+  const data = await get(config, `/payments/${id}`, "Failed to get payment");
+  return { gateway: "steadfast", raw: data };
 }
 
 export async function getPoliceStations(config) {
-    try {
-        const data = await request(`${BASE_URL}/police_stations`, { headers: getHeaders(config, false) }, "steadfast", "Failed to get police stations");
-        return { gateway: "steadfast", raw: data };
-    } catch (error) {
-        if (error instanceof DeliveryError) throw error;
-        throw new DeliveryError(error.message, "steadfast", "API_ERROR");
-    }
+  const data = await get(config, "/police_stations", "Failed to get police stations");
+  return { gateway: "steadfast", raw: data };
 }
 
-export async function cancelOrder(config, options) {
-    if (!options.trackingId) throw new DeliveryError("trackingId is required for cancelOrder", "steadfast", "MISSING_PARAM");
-    return { gateway: "steadfast", status: "cancelled", trackingId: options.trackingId };
+/**
+ * Steadfast's merchant API exposes no cancellation endpoint.
+ *
+ * This previously returned `{ status: "cancelled" }` without contacting the API at all,
+ * so callers marked orders cancelled in their own systems while the parcel still shipped.
+ * Returning a return-request instead would be equally wrong: a return is not a
+ * cancellation.
+ */
+export async function cancelOrder() {
+  throw new DeliveryError(
+    "Steadfast does not expose an order-cancellation endpoint. " +
+      "Use createReturnRequest(), or cancel via the Steadfast merchant panel.",
+    "steadfast",
+    "NOT_SUPPORTED"
+  );
 }

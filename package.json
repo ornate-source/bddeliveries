@@ -1,18 +1,42 @@
 {
   "name": "bddeliveries",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Centralized delivery gateway abstraction for Pathao, Steadfast, and Paperfly.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "type": "module",
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
   "scripts": {
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js tests/gateways/*.test.js",
+    "test:coverage": "node --test --experimental-test-coverage tests/*.test.js tests/gateways/*.test.js",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run test && npm run typecheck"
   },
   "author": "Sabbir Mahmud",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sabbir-mahmud/BDDeliveries.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sabbir-mahmud/BDDeliveries/issues"
+  },
+  "homepage": "https://github.com/sabbir-mahmud/BDDeliveries#readme",
   "devDependencies": {
     "typescript": "^5.8.2"
   },
