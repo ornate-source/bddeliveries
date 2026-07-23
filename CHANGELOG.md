@@ -60,7 +60,9 @@ from 2 to 87 tests; every `throw new DeliveryError` site in the adapters is exer
 - `callGateway({ gateway, method, ... })` — reaches Steadfast's eight previously
   unreachable operations (`getBalance`, `createReturnRequest`, …) and Pathao's
   `getStores`, through an allow-list (#14).
-- `getGatewayCapabilities(gateway)` — branch before calling rather than catching.
+- `getGatewayCapabilities(gateway)` — branch before calling rather than catching. Reads
+  `META.capabilities` rather than checking whether a method is exported: an unsupported
+  operation is still exported, because it has to throw `NOT_SUPPORTED`.
 - `unconfigure(gateway)` and `clearTokenCaches()`.
 - `STATUS` — the canonical status enum, also exported as the `DeliveryStatus` type.
 - `ValidationError`, thrown before any network call.

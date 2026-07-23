@@ -4,521 +4,2120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BDDeliveries | Documentation</title>
+    <title>BDDeliveries — One courier API for Pathao, Steadfast &amp; Paperfly</title>
     <meta name="description"
-        content="Unified delivery gateway package for Node.js — one API for Pathao, Steadfast, and Paperfly.">
+        content="Book, track and manage parcel deliveries through Pathao, Steadfast and Paperfly with one API. Works for a single shop or a multi-merchant marketplace.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body class="dark">
+    <div class="scroll-progress" id="progress"></div>
+    <div class="sidebar-overlay" id="overlay"></div>
+
+    <header class="mobile-header">
+        <button class="icon-btn" id="menu-open" aria-label="Open menu"><i data-lucide="menu"></i></button>
+        <div class="logo">
+            <span class="logo-mark"><i data-lucide="package"></i></span>
+            <span class="logo-text">bddeliveries</span>
+        </div>
+        <button class="icon-btn" id="theme-mobile" aria-label="Toggle theme">
+            <i data-lucide="sun" class="sun-icon"></i>
+            <i data-lucide="moon" class="moon-icon"></i>
+        </button>
+    </header>
+
     <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">
+                    <span class="logo-mark"><i data-lucide="package"></i></span>
                     <span class="logo-text">bddeliveries</span>
+                    <span class="logo-version">v1.1</span>
                 </div>
-                <div class="header-actions-sidebar">
-                    <button id="theme-toggle-desktop" class="theme-btn" aria-label="Toggle Theme">
-                        <i data-lucide="sun" class="sun-icon"></i>
-                        <i data-lucide="moon" class="moon-icon"></i>
-                    </button>
-                    <button id="sidebar-close" class="mobile-only theme-btn" aria-label="Close Menu">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
+                <button class="icon-btn mobile-only" id="menu-close" aria-label="Close menu">
+                    <i data-lucide="x"></i>
+                </button>
+                <button class="icon-btn" id="theme-desktop" aria-label="Toggle theme">
+                    <i data-lucide="sun" class="sun-icon"></i>
+                    <i data-lucide="moon" class="moon-icon"></i>
+                </button>
             </div>
+
             <nav class="sidebar-nav">
+                <p class="nav-group-title">Start here</p>
                 <ul>
-                    <li><a href="#introduction" class="active"><i data-lucide="home"></i> Introduction</a></li>
-                    <li><a href="#installation"><i data-lucide="download"></i> Installation</a></li>
-                    <li><a href="#configuration"><i data-lucide="settings"></i> Configuration</a></li>
-                    <li><a href="#quick-start"><i data-lucide="rocket"></i> Quick Start</a></li>
-                    <li>
-                        <a href="#gateways"><i data-lucide="truck"></i> Gateways</a>
-                        <ul class="submenu">
-                            <li><a href="#gateway-pathao">Pathao</a></li>
-                            <li><a href="#gateway-steadfast">Steadfast</a></li>
-                            <li><a href="#gateway-paperfly">Paperfly</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="#create-order"><i data-lucide="package-plus"></i> Create Order</a></li>
-                    <li><a href="#track-order"><i data-lucide="map-pin"></i> Track Order</a></li>
-                    <li><a href="#cancel-order"><i data-lucide="x-circle"></i> Cancel Order</a></li>
-                    <li><a href="#error-handling"><i data-lucide="alert-circle"></i> Error Handling</a></li>
+                    <li><a href="#what-is-this" class="active"><i data-lucide="help-circle"></i> What is this?</a></li>
+                    <li><a href="#three-actions"><i data-lucide="layout-grid"></i> The three actions</a></li>
+                    <li><a href="#install"><i data-lucide="download"></i> Install</a></li>
+                    <li><a href="#first-order"><i data-lucide="rocket"></i> Your first order</a></li>
+                </ul>
+
+                <p class="nav-group-title">Choose your setup</p>
+                <ul>
+                    <li><a href="#setup"><i data-lucide="git-fork"></i> Which one are you? <span
+                                class="nav-star">KEY</span></a></li>
+                    <li><a href="#single-shop"><i data-lucide="store"></i> Single shop</a></li>
+                    <li><a href="#marketplace"><i data-lucide="users"></i> Marketplace</a></li>
+                    <li><a href="#credentials"><i data-lucide="key-round"></i> How keys resolve</a></li>
+                </ul>
+
+                <p class="nav-group-title">How delivery works</p>
+                <ul>
+                    <li><a href="#journey"><i data-lucide="route"></i> The parcel journey</a></li>
+                    <li><a href="#couriers"><i data-lucide="truck"></i> The three couriers</a></li>
+                    <li><a href="#create-order"><i data-lucide="package-plus"></i> Create an order</a></li>
+                    <li><a href="#fields"><i data-lucide="list-checks"></i> Order fields</a></li>
+                    <li><a href="#track-order"><i data-lucide="map-pin"></i> Track an order</a></li>
+                    <li><a href="#statuses"><i data-lucide="activity"></i> Statuses</a></li>
+                    <li><a href="#cancel-order"><i data-lucide="ban"></i> Cancel an order</a></li>
+                </ul>
+
+                <p class="nav-group-title">Going live</p>
+                <ul>
+                    <li><a href="#validation"><i data-lucide="shield-check"></i> What we check first</a></li>
+                    <li><a href="#safe-retries"><i data-lucide="repeat"></i> Safe retries</a></li>
+                    <li><a href="#testing"><i data-lucide="flask-conical"></i> Testing safely</a></li>
+                    <li><a href="#errors"><i data-lucide="alert-circle"></i> Errors</a></li>
+                    <li><a href="#security"><i data-lucide="lock"></i> Security</a></li>
+                </ul>
+
+                <p class="nav-group-title">Reference</p>
+                <ul>
+                    <li><a href="#extras"><i data-lucide="puzzle"></i> Courier extras</a></li>
+                    <li><a href="#api-reference"><i data-lucide="book-open"></i> API reference</a></li>
+                    <li><a href="#env-variables"><i data-lucide="terminal"></i> Env variables</a></li>
                     <li><a href="#typescript"><i data-lucide="code"></i> TypeScript</a></li>
-                    <li><a href="#extending"><i data-lucide="plus-circle"></i> Extending</a></li>
-                    <li><a href="#api-reference"><i data-lucide="book-open"></i> API Reference</a></li>
-                    <li><a href="#env-variables"><i data-lucide="lock"></i> Env Variables</a></li>
+                    <li><a href="#adding-courier"><i data-lucide="plus-circle"></i> Add a courier</a></li>
+                    <li><a href="#faq"><i data-lucide="messages-square"></i> FAQ</a></li>
                 </ul>
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="content">
-            <header class="mobile-header">
-                <div class="logo">
-                    <span class="logo-text">bddeliveries</span>
-                </div>
-                <div class="header-actions">
-                    <button id="theme-toggle-mobile" class="theme-btn" aria-label="Toggle Theme">
-                        <i data-lucide="sun" class="sun-icon"></i>
-                        <i data-lucide="moon" class="moon-icon"></i>
-                    </button>
-                    <button id="menu-toggle" class="theme-btn mobile-only" aria-label="Toggle Menu">
-                        <i data-lucide="menu"></i>
-                    </button>
-                </div>
-            </header>
 
-            <section id="introduction" class="section">
-                <h1>BDDeliveries</h1>
-                <p class="lead">A unified delivery gateway package for Node.js. One API for
-                    <strong>Pathao</strong>, <strong>Steadfast</strong>, and <strong>Paperfly</strong>.
+            <!-- ============================ HERO ============================ -->
+            <section class="hero" id="what-is-this">
+                <h1><span class="line">One way to send a parcel,</span><span class="line grad">three couriers to carry
+                        it.</span></h1>
+                <p class="lead">BDDeliveries is a small Node.js library that talks to <strong>Pathao</strong>,
+                    <strong>Steadfast</strong> and <strong>Paperfly</strong> using the exact same instructions. Learn it
+                    once, and switching or adding a courier becomes a one-word change.
                 </p>
-                <div class="badges">
-                    <span class="badge"><i data-lucide="check-circle"></i> Node 18+</span>
-                    <span class="badge"><i data-lucide="shield"></i> TypeScript</span>
-                    <span class="badge badge-accent"><i data-lucide="zap"></i> Zero Config</span>
-                    <span class="badge badge-green"><i data-lucide="globe"></i> 3 Gateways</span>
-                    <span class="badge badge-purple"><i data-lucide="lock"></i> MIT License</span>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#install"><i data-lucide="rocket"></i> Get started <i
+                            data-lucide="arrow-right"></i></a>
+                    <a class="btn btn-ghost" href="#setup"><i data-lucide="git-fork"></i> One shop or a marketplace? <i
+                            data-lucide="arrow-right"></i></a>
                 </div>
-                <p>Designed for developers who need to integrate multiple courier providers without writing
-                    gateway-specific code. Call <code>createOrder()</code>, <code>trackOrder()</code>, or
-                    <code>cancelOrder()</code> — and let BDDeliveries route to the right adapter internally.
-                </p>
+                <div class="hero-badges">
+                    <span class="badge badge-accent" style="--b:0"><i data-lucide="truck"></i>
+                        <span class="counter" data-to="3">0</span>&nbsp;couriers</span>
+                    <span class="badge" style="--b:1"><i data-lucide="box"></i> Node 18+</span>
+                    <span class="badge" style="--b:2"><i data-lucide="feather"></i> Zero dependencies</span>
+                    <span class="badge" style="--b:3"><i data-lucide="type"></i> TypeScript included</span>
+                    <span class="badge badge-green" style="--b:4"><i data-lucide="check-circle-2"></i>
+                        <span class="counter" data-to="87">0</span>&nbsp;tests</span>
+                </div>
             </section>
 
-            <section id="installation" class="section">
-                <h2><i data-lucide="terminal"></i> Installation</h2>
-                <p>Install the core package:</p>
-                <div class="code-block" data-lang="bash">
-                    <pre><code>npm install bddeliveries</code></pre>
+            <!-- ====================== WHAT IS THIS ====================== -->
+            <section class="section reveal">
+                <h2><i data-lucide="help-circle"></i> Never done this before? Start here.</h2>
+                <p class="section-intro">Skip ahead if you already integrate courier APIs for a living.</p>
+
+                <div class="callout callout-plain">
+                    <i data-lucide="lightbulb"></i>
+                    <div>
+                        <p><strong>The travel-adapter analogy.</strong> Every country has a different wall socket.
+                            Rather than buying a new charger for each one, you carry a single universal adapter.</p>
+                        <p>Couriers are the sockets. Each one speaks its own language, wants its own passwords, names
+                            the same field three different ways, and answers in its own shape. BDDeliveries is the
+                            adapter that lets your code plug into any of them the same way.</p>
+                    </div>
+                </div>
+
+                <h3>Some words you'll see everywhere</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Word</th>
+                                <th>What it actually means</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Courier</strong> / <strong>gateway</strong></td>
+                                <td>A company that carries your parcel — Pathao, Steadfast, Paperfly. In code you always
+                                    pass one as <code>gateway: 'pathao'</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order</strong> / <strong>consignment</strong></td>
+                                <td>One parcel going to one customer. You create it; the courier picks it up.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Invoice</strong></td>
+                                <td>Your <em>own</em> reference for the order — an order number from your shop. You
+                                    choose it. Keep it unique.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tracking ID</strong></td>
+                                <td>The courier's reference, handed back after the order is created. Use it to ask
+                                    "where is my parcel?"</td>
+                            </tr>
+                            <tr>
+                                <td><strong>COD</strong></td>
+                                <td>Cash on Delivery — the rider collects money at the door and the courier pays you
+                                    later. <code>codAmount</code> is how much to collect.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Credentials</strong></td>
+                                <td>The username, password or API keys the courier gave you when you signed up as a
+                                    merchant. Secret. Never put them in front-end code.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sandbox</strong></td>
+                                <td>A fake version of the courier's system for testing, where no real parcel moves.
+                                    Only Pathao has one.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-warn">
+                    <i data-lucide="alert-triangle"></i>
+                    <div>
+                        <p><strong>This library runs on your server, never in a browser.</strong> Your courier
+                            credentials would be visible to anyone who opened DevTools. Call it from your backend —
+                            Express, Fastify, a Next.js route handler, a cron job.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== THREE ACTIONS ====================== -->
+            <section class="section reveal" id="three-actions">
+                <h2><i data-lucide="layout-grid"></i> Everything is three actions</h2>
+                <p class="section-intro">That's the whole library. Every courier, the same three functions.</p>
+
+                <div class="card-grid">
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="package-plus"></i></div>
+                        <h4>createOrder()</h4>
+                        <p>Book a parcel for pickup. You get back a tracking ID.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="map-pin"></i></div>
+                        <h4>trackOrder()</h4>
+                        <p>Ask where the parcel is right now.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="ban"></i></div>
+                        <h4>cancelOrder()</h4>
+                        <p>Call off a booking — <em>where the courier actually supports it</em>.</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-plain">
+                    <i data-lucide="info"></i>
+                    <div>
+                        <p>Only the <code>gateway</code> value changes between couriers. The rest of your code stays
+                            identical:</p>
+                    </div>
+                </div>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>await createOrder({ gateway: 'pathao',    /* …same fields… */ });
+await createOrder({ gateway: 'steadfast', /* …same fields… */ });
+await createOrder({ gateway: 'paperfly',  /* …same fields… */ });</code></pre>
                     <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
                 </div>
             </section>
 
-            <section id="configuration" class="section">
-                <h2><i data-lucide="settings"></i> Configuration</h2>
-                <p>BDDeliveries supports a <strong>three-tier credential system</strong>. Use whichever method
-                    fits your app — or combine them. Highest priority wins.</p>
+            <!-- ====================== INSTALL ====================== -->
+            <section class="section reveal" id="install">
+                <h2><i data-lucide="download"></i> Install</h2>
+                <p class="section-intro">One command. No other packages needed.</p>
 
-                <div class="tier-list">
-                    <div class="tier-item">
-                        <div class="tier-number">1</div>
-                        <div class="tier-content">
-                            <h4>Per-Call Overrides <span class="badge" style="font-size:0.65rem; padding:0.2rem 0.5rem; vertical-align: middle;">Highest Priority</span></h4>
-                            <p>Pass credentials directly in any function call. Useful for multi-tenant apps
-                                where different merchants have different keys.</p>
-                        </div>
-                    </div>
-                    <div class="tier-item">
-                        <div class="tier-number">2</div>
-                        <div class="tier-content">
-                            <h4>Global <code>configure()</code> <span class="badge badge-green" style="font-size:0.65rem; padding:0.2rem 0.5rem; vertical-align: middle;">Recommended</span></h4>
-                            <p>Call once at app startup to set credentials for all gateways you use.</p>
-                        </div>
-                    </div>
-                    <div class="tier-item">
-                        <div class="tier-number">3</div>
-                        <div class="tier-content">
-                            <h4>Environment Variables <span class="badge badge-purple" style="font-size:0.65rem; padding:0.2rem 0.5rem; vertical-align: middle;">Zero Config</span></h4>
-                            <p>Set env vars and the package reads them automatically — no code needed.</p>
-                        </div>
-                    </div>
+                <div class="code-block" data-lang="bash">
+                    <pre><code>npm install bddeliveries</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
                 </div>
 
-                <h3>Global Configure Example</h3>
-                <div class="code-block" data-lang="javascript">
-                    <pre><code>import { configure } from 'bddeliveries';
+                <div class="card-grid">
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="box"></i></div>
+                        <h4>Node 18 or newer</h4>
+                        <p>Uses the built-in <code>fetch</code>, so there is nothing else to install.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="file-code-2"></i></div>
+                        <h4>ESM only</h4>
+                        <p>Use <code>import</code>. Add <code>"type": "module"</code> to your package.json.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="type"></i></div>
+                        <h4>Types built in</h4>
+                        <p>No <code>@types/…</code> package. Autocomplete works out of the box.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== FIRST ORDER ====================== -->
+            <section class="section reveal" id="first-order">
+                <h2><i data-lucide="rocket"></i> Your first order, end to end</h2>
+                <p class="section-intro">Three steps from an empty file to a booked parcel.</p>
+
+                <ol class="steps">
+                    <li>
+                        <h4>Put your credentials in a <code>.env</code> file</h4>
+                        <p>Never commit this file. Your courier gave you these when you signed up as a merchant.</p>
+                        <div class="code-block" data-lang="bash">
+                            <pre><code>PATHAO_CLIENT_ID=your-client-id
+PATHAO_CLIENT_SECRET=your-client-secret
+PATHAO_USERNAME=you@shop.com
+PATHAO_PASSWORD=your-password
+PATHAO_STORE_ID=123456</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </li>
+                    <li>
+                        <h4>Tell the library about them, once, at startup</h4>
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>import { configure } from 'bddeliveries';
 
 configure({
   pathao: {
-    clientId: process.env.PATHAO_CLIENT_ID,
+    clientId:     process.env.PATHAO_CLIENT_ID,
     clientSecret: process.env.PATHAO_CLIENT_SECRET,
-    username: process.env.PATHAO_USERNAME,
-    password: process.env.PATHAO_PASSWORD,
+    username:     process.env.PATHAO_USERNAME,
+    password:     process.env.PATHAO_PASSWORD,
+    storeId:      process.env.PATHAO_STORE_ID,
+  },
+});</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </li>
+                    <li>
+                        <h4>Book the parcel</h4>
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>import { createOrder } from 'bddeliveries';
+
+const order = await createOrder({
+  gateway: 'pathao',
+  invoice: 'INV-1001',                 // your own order number
+  recipientName: 'John Doe',
+  recipientPhone: '01711111111',
+  recipientAddress: 'House 12, Road 5, Dhanmondi, Dhaka',
+  codAmount: 1500,                     // taka to collect at the door
+});
+
+console.log(order.trackingId);         // save this in your database
+console.log(order.status);             // "pending"</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </li>
+                </ol>
+
+                <div class="callout callout-tip">
+                    <i data-lucide="check-circle-2"></i>
+                    <div>
+                        <p><strong>Store <code>order.trackingId</code> against your order row.</strong> It is the only
+                            way to ask the courier about this parcel later. If you lose it, you are down to phoning
+                            support.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== SETUP SPLIT ====================== -->
+            <section class="section reveal" id="setup">
+                <h2><i data-lucide="git-fork"></i> Which one are you?</h2>
+                <p class="section-intro">This one decision changes how you set up credentials. Get it right now and
+                    nothing later will surprise you.</p>
+
+                <div class="mode-grid">
+                    <div class="mode-card reveal">
+                        <span class="mode-eyebrow"><i data-lucide="store"></i> Most people</span>
+                        <h3>A single shop</h3>
+                        <p>You run one business. There is <strong>one</strong> Pathao account, <strong>one</strong>
+                            Steadfast account. Every parcel ships under your own merchant account.</p>
+                        <p style="margin-bottom:0"><strong>→ Use <code>configure()</code>.</strong> Set it once when
+                            your server boots and forget about it.</p>
+                    </div>
+                    <div class="mode-card reveal">
+                        <span class="mode-eyebrow"><i data-lucide="users"></i> Platforms &amp; SaaS</span>
+                        <h3>A marketplace</h3>
+                        <p>You host many sellers. <strong>Each seller</strong> has their own Pathao account, and parcels
+                            must ship under <em>their</em> account, not yours.</p>
+                        <p style="margin-bottom:0"><strong>→ Use <code>DeliveryClient</code>.</strong> One client per
+                            seller, each with its own credentials.</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-danger">
+                    <i data-lucide="alert-octagon"></i>
+                    <div>
+                        <p><strong>Marketplaces: do not use <code>configure()</code>.</strong> It stores credentials in
+                            one shared place for the whole process. If two sellers' requests overlap, the second
+                            <code>configure()</code> overwrites the first — and a parcel can be booked under the wrong
+                            seller's account. <code>DeliveryClient</code> exists precisely to prevent this.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== SINGLE SHOP ====================== -->
+            <section class="section reveal" id="single-shop">
+                <h2><i data-lucide="store"></i> Setup: a single shop</h2>
+                <p class="section-intro">Call <code>configure()</code> once, then call the three actions from anywhere.
+                </p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>// setup.js — imported once when your server starts
+import { configure } from 'bddeliveries';
+
+configure({
+  pathao: {
+    clientId:     process.env.PATHAO_CLIENT_ID,
+    clientSecret: process.env.PATHAO_CLIENT_SECRET,
+    username:     process.env.PATHAO_USERNAME,
+    password:     process.env.PATHAO_PASSWORD,
+    storeId:      process.env.PATHAO_STORE_ID,
   },
   steadfast: {
-    apiKey: process.env.STEADFAST_API_KEY,
+    apiKey:    process.env.STEADFAST_API_KEY,
     secretKey: process.env.STEADFAST_SECRET_KEY,
   },
 });</code></pre>
                     <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
                 </div>
 
-                <h3>Per-Call Override Example</h3>
                 <div class="code-block" data-lang="javascript">
-                    <pre><code>import { createOrder } from 'bddeliveries';
+                    <pre><code>// routes/checkout.js — anywhere else in your app
+import { createOrder } from 'bddeliveries';
 
-// This apiKey overrides whatever was set in configure()
-await createOrder({
-  gateway: 'steadfast',
-  apiKey: 'API_KEY_OVERRIDE',
-  secretKey: 'SECRET_KEY_OVERRIDE',
-  recipientName: 'John Doe',
-  address: 'Dhaka',
-});</code></pre>
-                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
-                </div>
-            </section>
-
-            <section id="quick-start" class="section">
-                <h2><i data-lucide="play"></i> Quick Start</h2>
-                <p>Get up and running in three steps: configure, create, and track.</p>
-                <div class="code-block" data-lang="javascript">
-                    <pre><code>import { configure, createOrder, trackOrder } from 'bddeliveries';
-
-// 1. Configure credentials once
-configure({
-  pathao: { clientId: '...', clientSecret: '...', username: '...', password: '...' },
-});
-
-// 2. Create Order — same function, any gateway
 const order = await createOrder({
-  gateway: 'pathao',
-  recipientName: 'Jane Doe',
-  address: 'Mirpur, Dhaka',
-  amount: 1500,
-});
-
-console.log(order.trackingId); // "PATHAO-..."
-console.log(order.status);     // "created"
-
-// 3. Track Order
-const tracking = await trackOrder({
-  gateway: 'pathao',
-  trackingId: order.trackingId,
-});
-
-console.log(tracking.status);  // "in_transit"
-</code></pre>
-                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
-                </div>
-            </section>
-
-            <section id="gateways" class="section">
-                <h2><i data-lucide="truck"></i> Supported Gateways</h2>
-                <p>Each gateway is loaded lazily — only the adapter you actually use gets imported at runtime.</p>
-
-                <div class="gateway-grid">
-                    <div class="gateway-card">
-                        <h4><i data-lucide="map"></i> Pathao</h4>
-                        <p>Popular last-mile delivery service in BD.</p>
-                        <div class="gateway-badges">
-                            <span class="badge">Client ID/Secret</span>
-                        </div>
-                    </div>
-                    <div class="gateway-card">
-                        <h4><i data-lucide="package"></i> Steadfast</h4>
-                        <p>Reliable and fast delivery courier in BD.</p>
-                        <div class="gateway-badges">
-                            <span class="badge">API/Secret Key</span>
-                        </div>
-                    </div>
-                    <div class="gateway-card">
-                        <h4><i data-lucide="send"></i> Paperfly</h4>
-                        <p>High-coverage delivery network.</p>
-                        <div class="gateway-badges">
-                            <span class="badge">Username/Password</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="create-order" class="section">
-                <h2><i data-lucide="package-plus"></i> Create Order</h2>
-                <p>Create a delivery order through any gateway. Pass <code>gateway</code> plus the relevant options.</p>
-
-                <div class="code-block" data-lang="javascript">
-                    <pre><code>const result = await createOrder({
-  gateway: 'pathao',
-  recipientName: 'John Doe',
-  address: 'Gulshan, Dhaka',
-  amount: 2000,
+  gateway: 'steadfast',
+  invoice: 'INV-1002',
+  recipientName: 'Ayesha Rahman',
+  recipientPhone: '01811111111',
+  recipientAddress: 'Flat 4B, House 9, Banani, Dhaka',
+  codAmount: 2300,
 });</code></pre>
                     <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
                 </div>
-            </section>
 
-            <section id="track-order" class="section">
-                <h2><i data-lucide="map-pin"></i> Track Order</h2>
-                <p>Track a delivery. Pass the <code>trackingId</code> from the original order.</p>
-
-                <div class="code-block" data-lang="javascript">
-                    <pre><code>import { trackOrder } from 'bddeliveries';
-
-const status = await trackOrder({
-  gateway: 'pathao',
-  trackingId: 'PATHAO-12345',
-});
-
-console.log(status);</code></pre>
-                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                <div class="callout callout-tip">
+                    <i data-lucide="sparkles"></i>
+                    <div>
+                        <p><strong>Shortcut:</strong> if your environment variables use the standard names (see
+                            <a href="#env-variables">Env variables</a>), you can skip <code>configure()</code>
+                            entirely — the library reads them automatically.
+                        </p>
+                    </div>
                 </div>
             </section>
 
-            <section id="cancel-order" class="section">
-                <h2><i data-lucide="x-circle"></i> Cancel Order</h2>
-                <p>Cancel an existing order. Some gateways may only allow cancellation before dispatch.</p>
+            <!-- ====================== MARKETPLACE ====================== -->
+            <section class="section reveal" id="marketplace">
+                <h2><i data-lucide="users"></i> Setup: a marketplace</h2>
+                <p class="section-intro">One <code>DeliveryClient</code> per seller. Their credentials never touch
+                    anyone else's.</p>
 
                 <div class="code-block" data-lang="javascript">
-                    <pre><code>import { cancelOrder } from 'bddeliveries';
+                    <pre><code>import { DeliveryClient } from 'bddeliveries';
 
-const cancellation = await cancelOrder({
-  gateway: 'steadfast',
-  trackingId: 'STEADFAST-98765',
-});
-
-console.log(cancellation.status); // "cancelled"</code></pre>
-                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
-                </div>
-            </section>
-
-            <section id="error-handling" class="section">
-                <h2><i data-lucide="alert-circle"></i> Error Handling</h2>
-                <p>BDDeliveries provides a structured error hierarchy for precise error handling.</p>
-
-                <div class="code-block" data-lang="javascript">
-                    <pre><code>import {
-  createOrder,
-  DeliveryError,
-  GatewayNotFoundError,
-  ConfigurationError,
-} from 'bddeliveries';
-
-try {
-  await createOrder({ gateway: 'pathao', recipientName: 'Jane' });
-} catch (error) {
-  if (error instanceof ConfigurationError) {
-    // Missing API keys
-    console.log('Missing:', error.missingKeys);
-  } else if (error instanceof GatewayNotFoundError) {
-    // Unknown gateway name
-    console.log('Unsupported gateway');
-  } else if (error instanceof DeliveryError) {
-    // Gateway-specific failure
-    console.log(error.gateway);
-    console.log(error.code);
-    console.log(error.originalError);
-  }
-}</code></pre>
-                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
-                </div>
-            </section>
-
-            <section id="typescript" class="section">
-                <h2><i data-lucide="code"></i> TypeScript Support</h2>
-                <p>Full type definitions are included.</p>
-                <div class="code-block" data-lang="typescript">
-                    <pre><code>import {
-  createOrder,
-  configure,
-  type CreateOrderOptions,
-} from 'bddeliveries';
-
-const options: CreateOrderOptions = {
-  gateway: 'pathao',
-  recipientName: 'Jane',
-};
-
-const result = await createOrder(options);</code></pre>
-                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
-                </div>
-            </section>
-
-            <section id="extending" class="section">
-                <h2><i data-lucide="plus-circle"></i> Extending the Package</h2>
-                <p>The package uses a decentralized Open/Closed architecture. To add a new gateway, you don't need to modify <code>config.js</code> or <code>index.js</code>.</p>
-                <ol>
-                    <li>Create a new file in <code>src/gateways/</code> (e.g., <code>mycourier.js</code>).</li>
-                    <li>Export your gateway's <code>META</code> requirements.</li>
-                    <li>Implement <code>createOrder</code>, <code>trackOrder</code>, and <code>cancelOrder</code> using the shared <code>request</code> utility from <code>src/utils.js</code>.</li>
-                    <li>Register the new file inside <code>src/gateways/index.js</code>.</li>
-                </ol>
-                <div class="code-block" data-lang="javascript">
-                    <pre><code>// src/gateways/mycourier.js
-import { request } from "../utils.js";
-
-export const META = {
-    envMap: {
-        apiKey: "MYCOURIER_API_KEY",
-        sandbox: "MYCOURIER_SANDBOX",
+// Build a client from whatever you have stored for this seller
+function clientFor(seller) {
+  return new DeliveryClient({
+    pathao: {
+      clientId:     seller.pathaoClientId,
+      clientSecret: seller.pathaoClientSecret,
+      username:     seller.pathaoUsername,
+      password:     seller.pathaoPassword,
+      storeId:      seller.pathaoStoreId,
     },
-    requiredKeys: ["apiKey"],
-};
+  });
+}
 
-export async function createOrder(config, options) {
-    // config.apiKey will be automatically resolved by the core package
-    return request('https://api.mycourier.com/order', { ... }, 'mycourier', 'Failed to create');
-}</code></pre>
+// Two sellers, two clients, zero chance of crossing wires
+const order = await clientFor(seller).createOrder({
+  gateway: 'pathao',
+  invoice: `INV-${orderId}`,
+  recipientName: buyer.name,
+  recipientPhone: buyer.phone,
+  recipientAddress: buyer.address,
+  codAmount: total,
+});</code></pre>
                     <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <p>A <code>DeliveryClient</code> exposes the same three actions as the global functions, plus
+                    <code>callGateway()</code>. It also caches courier login tokens <em>per seller</em>, so sellers
+                    never share a session.
+                </p>
+
+                <div class="callout callout-plain">
+                    <i data-lucide="database"></i>
+                    <div>
+                        <p><strong>Where do seller credentials live?</strong> In your database, encrypted at rest.
+                            Build the client on demand for each request — creating one is cheap.</p>
+                    </div>
                 </div>
             </section>
 
-            <section id="api-reference" class="section">
-                <h2><i data-lucide="book-open"></i> API Reference</h2>
+            <!-- ====================== CREDENTIALS ====================== -->
+            <section class="section reveal" id="credentials">
+                <h2><i data-lucide="key-round"></i> How credentials are found</h2>
+                <p class="section-intro">Three places are checked, in this order. The first one that has a value wins.
+                </p>
 
-                <h3>Functions</h3>
+                <div class="cascade" id="cascade">
+                    <div class="tier">
+                        <div class="tier-rank">1</div>
+                        <div class="tier-body">
+                            <h4>Passed into the call <span class="tier-tag">Marketplace</span></h4>
+                            <p><code>createOrder({ gateway: 'pathao', clientId: '…' })</code> — beats everything below.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="tier">
+                        <div class="tier-rank">2</div>
+                        <div class="tier-body">
+                            <h4>Set with <code>configure()</code> <span class="tier-tag">Single shop</span></h4>
+                            <p>Your app-wide defaults, set once at startup.</p>
+                        </div>
+                    </div>
+                    <div class="tier">
+                        <div class="tier-rank">3</div>
+                        <div class="tier-body">
+                            <h4>Environment variables <span class="tier-tag">Fallback</span></h4>
+                            <p>Read automatically from <code>process.env</code>. Handy for local development.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-tip">
+                    <i data-lucide="shield-check"></i>
+                    <div>
+                        <p><strong>Only real credentials are picked up from a call.</strong> Order fields like
+                            <code>recipientName</code> are kept well away from the credential object, so a customer
+                            named "password" can never overwrite your login. Missing credentials throw
+                            <code>MISSING_CREDENTIALS</code> and name exactly which keys are absent.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== JOURNEY ====================== -->
+            <section class="section reveal" id="journey">
+                <h2><i data-lucide="route"></i> The parcel journey</h2>
+                <p class="section-intro">What actually happens between a customer clicking "Order" and a parcel
+                    arriving at their door.</p>
+
+                <div class="flow reveal">
+                    <div class="flow-track">
+                        <div class="flow-node" style="--i:0">
+                            <div class="flow-dot"><i data-lucide="shopping-cart"></i></div>
+                            <span class="flow-actor">Customer</span>
+                            <h5>Places an order</h5>
+                            <p>On your website</p>
+                        </div>
+                        <div class="flow-node" style="--i:1">
+                            <div class="flow-dot"><i data-lucide="server"></i></div>
+                            <span class="flow-actor">Your server</span>
+                            <h5>createOrder()</h5>
+                            <p>Gets a tracking ID back</p>
+                        </div>
+                        <div class="flow-node" style="--i:2">
+                            <div class="flow-dot"><i data-lucide="warehouse"></i></div>
+                            <span class="flow-actor">Courier</span>
+                            <h5>Picks it up</h5>
+                            <p>A rider collects from you</p>
+                        </div>
+                        <div class="flow-node" style="--i:3">
+                            <div class="flow-dot"><i data-lucide="truck"></i></div>
+                            <span class="flow-actor">Courier</span>
+                            <h5>In transit</h5>
+                            <p>Through sorting hubs</p>
+                        </div>
+                        <div class="flow-node" style="--i:4">
+                            <div class="flow-dot"><i data-lucide="home"></i></div>
+                            <span class="flow-actor">Customer</span>
+                            <h5>Delivered</h5>
+                            <p>Pays COD at the door</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p>Your code is only involved in step 2. After that you poll <code>trackOrder()</code> — on a schedule,
+                    or when a customer asks — to follow steps 3 to 5.</p>
+
+                <div class="callout callout-warn">
+                    <i data-lucide="bell-off"></i>
+                    <div>
+                        <p><strong>There are no webhooks.</strong> None of these three couriers reliably calls your
+                            server when a parcel moves. You have to ask. A cron job that tracks all open orders every
+                            15–30 minutes is the normal pattern — don't poll every order every minute, you will get
+                            rate-limited.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== COURIERS ====================== -->
+            <section class="section reveal" id="couriers">
+                <h2><i data-lucide="truck"></i> The three couriers</h2>
+                <p class="section-intro">What each one needs from you, and what it can actually do.</p>
+
+                <div class="gateway-card reveal">
+                    <div class="gateway-head">
+                        <span class="gateway-mark"><i data-lucide="bike"></i></span>
+                        <h3>Pathao</h3>
+                    </div>
+                    <p>Nationwide coverage and the most complete API of the three. Needs a <strong>store ID</strong>
+                        because one merchant account can have several pickup locations.</p>
+                    <div class="gateway-badges">
+                        <span class="chip"><i data-lucide="key"></i> clientId · clientSecret · username · password</span>
+                        <span class="chip"><i data-lucide="store"></i> storeId required</span>
+                        <span class="chip chip-ok"><i data-lucide="flask-conical"></i> Has a sandbox</span>
+                        <span class="chip chip-ok"><i data-lucide="check"></i> Create</span>
+                        <span class="chip chip-ok"><i data-lucide="check"></i> Track</span>
+                        <span class="chip chip-no"><i data-lucide="x"></i> No cancel</span>
+                    </div>
+                </div>
+
+                <div class="gateway-card reveal">
+                    <div class="gateway-head">
+                        <span class="gateway-mark"><i data-lucide="package-check"></i></span>
+                        <h3>Steadfast</h3>
+                    </div>
+                    <p>Simple key-based login and by far the richest set of extras — account balance, bulk orders,
+                        return requests, payment history.</p>
+                    <div class="gateway-badges">
+                        <span class="chip"><i data-lucide="key"></i> apiKey · secretKey</span>
+                        <span class="chip chip-ok"><i data-lucide="layers"></i> 8 extra operations</span>
+                        <span class="chip chip-warn"><i data-lucide="flask-conical"></i> No sandbox</span>
+                        <span class="chip chip-ok"><i data-lucide="check"></i> Create</span>
+                        <span class="chip chip-ok"><i data-lucide="check"></i> Track</span>
+                        <span class="chip chip-no"><i data-lucide="x"></i> No cancel</span>
+                    </div>
+                </div>
+
+                <div class="gateway-card reveal">
+                    <div class="gateway-head">
+                        <span class="gateway-mark"><i data-lucide="mail"></i></span>
+                        <h3>Paperfly</h3>
+                    </div>
+                    <p>Username/password login plus a separate merchant key. Tracks by <em>your</em> invoice number
+                        rather than a courier-issued ID.</p>
+                    <div class="gateway-badges">
+                        <span class="chip"><i data-lucide="key"></i> username · password · paperflyKey</span>
+                        <span class="chip chip-warn"><i data-lucide="flask-conical"></i> No sandbox</span>
+                        <span class="chip chip-ok"><i data-lucide="check"></i> Create</span>
+                        <span class="chip chip-ok"><i data-lucide="check"></i> Track</span>
+                        <span class="chip chip-warn"><i data-lucide="alert-triangle"></i> Cancel unverified</span>
+                    </div>
+                </div>
+
+                <h3>Capability matrix</h3>
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Function</th>
-                                <th>Description</th>
-                                <th>Returns</th>
+                                <th>Operation</th>
+                                <th class="center">Pathao</th>
+                                <th class="center">Steadfast</th>
+                                <th class="center">Paperfly</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><code>configure(configs)</code></td>
-                                <td>Set global credentials for one or more gateways.</td>
-                                <td><code>void</code></td>
+                                <td><code>createOrder</code></td>
+                                <td class="center yes">✔</td>
+                                <td class="center yes">✔</td>
+                                <td class="center yes">✔</td>
                             </tr>
                             <tr>
-                                <td><code>clearConfig()</code></td>
-                                <td>Clear all stored global configuration.</td>
-                                <td><code>void</code></td>
+                                <td><code>trackOrder</code></td>
+                                <td class="center yes">✔</td>
+                                <td class="center yes">✔</td>
+                                <td class="center yes">✔</td>
                             </tr>
+                            <tr>
+                                <td><code>cancelOrder</code></td>
+                                <td class="center no">✘</td>
+                                <td class="center no">✘</td>
+                                <td class="center maybe">?</td>
+                            </tr>
+                            <tr>
+                                <td>Sandbox for testing</td>
+                                <td class="center yes">✔</td>
+                                <td class="center no">✘</td>
+                                <td class="center no">✘</td>
+                            </tr>
+                            <tr>
+                                <td>Extra operations</td>
+                                <td class="center">1</td>
+                                <td class="center">8</td>
+                                <td class="center">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p>Don't want to memorise that table? Ask at runtime:</p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { getGatewayCapabilities } from 'bddeliveries';
+
+const can = await getGatewayCapabilities('steadfast');
+if (can.cancelOrder) { /* … */ }     // false — so don't show the button</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+            </section>
+
+            <!-- ====================== CREATE ORDER ====================== -->
+            <section class="section reveal" id="create-order">
+                <h2><i data-lucide="package-plus"></i> Create an order</h2>
+                <p class="section-intro">The same five fields work everywhere. Each courier then adds a few of its own.
+                </p>
+
+                <div class="tabs">
+                    <div class="tab-list" role="tablist" aria-label="createOrder examples">
+                        <button class="tab-btn" role="tab" aria-selected="true" data-tab="co-pathao">Pathao</button>
+                        <button class="tab-btn" role="tab" aria-selected="false"
+                            data-tab="co-steadfast">Steadfast</button>
+                        <button class="tab-btn" role="tab" aria-selected="false" data-tab="co-paperfly">Paperfly</button>
+                    </div>
+
+                    <div class="tab-panel" id="co-pathao" role="tabpanel">
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>const order = await createOrder({
+  gateway: 'pathao',
+  invoice: 'INV-1001',
+  recipientName: 'John Doe',
+  recipientPhone: '01711111111',
+  recipientAddress: 'House 12, Road 5, Dhanmondi, Dhaka',  // 10 chars minimum
+  codAmount: 1500,
+
+  // Pathao-specific
+  storeId: 123456,        // or PATHAO_STORE_ID / configure()
+  itemWeight: 1.5,        // kg, between 0.5 and 10
+  itemQuantity: 2,
+  cityId: 1,              // optional: Pathao's own area codes
+  zoneId: 52,
+});
+
+order.trackingId;   // Pathao consignment id, e.g. "DA290124ABCDE"
+order.status;       // "pending"</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="co-steadfast" role="tabpanel">
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>const order = await createOrder({
+  gateway: 'steadfast',
+  invoice: 'INV-1002',
+  recipientName: 'Ayesha Rahman',
+  recipientPhone: '01811111111',
+  recipientAddress: 'Flat 4B, House 9, Banani, Dhaka',
+  codAmount: 2300,
+
+  // Steadfast-specific
+  alternativePhone: '01911111111',
+  note: 'Call before delivery',
+});
+
+order.trackingId;    // consignment id, e.g. "987654"
+order.trackingCode;  // also returned, e.g. "TRK-987654"</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="co-paperfly" role="tabpanel">
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>const order = await createOrder({
+  gateway: 'paperfly',
+  invoice: 'INV-1003',
+  recipientName: 'Karim Uddin',
+  recipientPhone: '01611111111',
+  recipientAddress: 'Road 3, Uttara Sector 7, Dhaka',
+  codAmount: 900,
+
+  // Paperfly-specific
+  storeName: 'Main Warehouse',
+  maxWeight: 1,
+});
+
+order.trackingId;              // your own invoice — "INV-1003"
+order.providerTrackingNumber;  // Paperfly's number, if returned</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="callout callout-plain">
+                    <i data-lucide="phone"></i>
+                    <div>
+                        <p><strong>Phone numbers are cleaned up for you.</strong>
+                            <code>+8801711111111</code>, <code>8801711111111</code>, <code>017 1111 1111</code> and
+                            <code>017-1111-1111</code> all become <code>01711111111</code> before being sent. Anything
+                            that isn't a real Bangladeshi mobile number is rejected before the request leaves.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== FIELDS ====================== -->
+            <section class="section reveal" id="fields">
+                <h2><i data-lucide="list-checks"></i> Order fields</h2>
+                <p class="section-intro">Everything you can pass to <code>createOrder</code>, and which courier uses it.
+                </p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th class="center">Pathao</th>
+                                <th class="center">Steadfast</th>
+                                <th class="center">Paperfly</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>invoice</code></td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td>Your own order reference. Keep it unique.</td>
+                            </tr>
+                            <tr>
+                                <td><code>recipientName</code></td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td>Who receives the parcel.</td>
+                            </tr>
+                            <tr>
+                                <td><code>recipientPhone</code></td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td>Normalized to <code>01XXXXXXXXX</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>recipientAddress</code></td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td class="center yes">req</td>
+                                <td><strong>Pathao needs 10+ characters.</strong></td>
+                            </tr>
+                            <tr>
+                                <td><code>codAmount</code></td>
+                                <td class="center">opt</td>
+                                <td class="center">opt</td>
+                                <td class="center">opt</td>
+                                <td>Taka to collect. Defaults to 0.</td>
+                            </tr>
+                            <tr>
+                                <td><code>storeId</code></td>
+                                <td class="center yes">req</td>
+                                <td class="center">—</td>
+                                <td class="center">—</td>
+                                <td>Which pickup location. Or <code>PATHAO_STORE_ID</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>note</code></td>
+                                <td class="center">opt</td>
+                                <td class="center">opt</td>
+                                <td class="center">—</td>
+                                <td>Instructions for the rider.</td>
+                            </tr>
+                            <tr>
+                                <td><code>itemDescription</code></td>
+                                <td class="center">opt</td>
+                                <td class="center">opt</td>
+                                <td class="center">opt</td>
+                                <td>What's in the box.</td>
+                            </tr>
+                            <tr>
+                                <td><code>itemWeight</code></td>
+                                <td class="center">opt</td>
+                                <td class="center">—</td>
+                                <td class="center">—</td>
+                                <td>kg. Pathao allows 0.5–10.</td>
+                            </tr>
+                            <tr>
+                                <td><code>itemQuantity</code></td>
+                                <td class="center">opt</td>
+                                <td class="center">—</td>
+                                <td class="center">—</td>
+                                <td>Number of items. Defaults to 1.</td>
+                            </tr>
+                            <tr>
+                                <td><code>cityId</code> <code>zoneId</code> <code>areaId</code></td>
+                                <td class="center">opt</td>
+                                <td class="center">—</td>
+                                <td class="center">—</td>
+                                <td>Pathao's own location codes.</td>
+                            </tr>
+                            <tr>
+                                <td><code>alternativePhone</code></td>
+                                <td class="center">—</td>
+                                <td class="center">opt</td>
+                                <td class="center">—</td>
+                                <td>Second number to try.</td>
+                            </tr>
+                            <tr>
+                                <td><code>recipientEmail</code></td>
+                                <td class="center">—</td>
+                                <td class="center">opt</td>
+                                <td class="center">—</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td><code>totalLot</code></td>
+                                <td class="center">—</td>
+                                <td class="center">opt</td>
+                                <td class="center">—</td>
+                                <td>Number of packages.</td>
+                            </tr>
+                            <tr>
+                                <td><code>storeName</code></td>
+                                <td class="center">—</td>
+                                <td class="center">—</td>
+                                <td class="center">opt</td>
+                                <td>Shown to the Paperfly rider.</td>
+                            </tr>
+                            <tr>
+                                <td><code>maxWeight</code></td>
+                                <td class="center">—</td>
+                                <td class="center">—</td>
+                                <td class="center">opt</td>
+                                <td>kg. Defaults to 0.5.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-plain">
+                    <i data-lucide="git-compare"></i>
+                    <div>
+                        <p><strong>Old snake_case names still work.</strong> <code>recipient_name</code>,
+                            <code>cod_amount</code>, <code>item_weight</code> and friends are all accepted, so existing
+                            code keeps running. New code should prefer camelCase — that's what TypeScript autocompletes.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== TRACK ====================== -->
+            <section class="section reveal" id="track-order">
+                <h2><i data-lucide="map-pin"></i> Track an order</h2>
+                <p class="section-intro">Ask the courier where the parcel is. Same call for every courier.</p>
+
+                <div class="tabs">
+                    <div class="tab-list" role="tablist" aria-label="trackOrder examples">
+                        <button class="tab-btn" role="tab" aria-selected="true" data-tab="to-basic">By tracking
+                            ID</button>
+                        <button class="tab-btn" role="tab" aria-selected="false" data-tab="to-invoice">By invoice</button>
+                        <button class="tab-btn" role="tab" aria-selected="false" data-tab="to-cron">A polling job</button>
+                    </div>
+
+                    <div class="tab-panel" id="to-basic" role="tabpanel">
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>const result = await trackOrder({
+  gateway: 'pathao',
+  trackingId: 'DA290124ABCDE',     // the id you saved at creation
+});
+
+result.status;          // "in_transit"  — always one of the canonical values
+result.providerStatus;  // "In_Transit"  — Pathao's own wording, untouched
+result.raw;             // the courier's full response, if you need it</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="to-invoice" role="tabpanel">
+                        <p>Steadfast and Paperfly can look an order up by your own invoice number — useful if you never
+                            stored the courier's ID.</p>
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>// Steadfast: by invoice, or by tracking code
+await trackOrder({ gateway: 'steadfast', invoice: 'INV-1002' });
+await trackOrder({ gateway: 'steadfast', trackingCode: 'TRK-987654' });
+
+// Paperfly always tracks by your invoice
+await trackOrder({ gateway: 'paperfly', trackingId: 'INV-1003' });</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="to-cron" role="tabpanel">
+                        <p>Because there are no webhooks, this is how most apps keep order status up to date.</p>
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>import { trackOrder, STATUS } from 'bddeliveries';
+
+const DONE = [STATUS.DELIVERED, STATUS.RETURNED, STATUS.CANCELLED];
+
+// Run every 15–30 minutes
+for (const order of await db.findOpenOrders()) {
+  try {
+    const { status, providerStatus } = await trackOrder({
+      gateway: order.gateway,
+      trackingId: order.trackingId,
+    });
+
+    await db.updateOrder(order.id, { status, providerStatus });
+    if (DONE.includes(status)) await db.closeOrder(order.id);
+  } catch (error) {
+    // One bad order must not stop the whole batch
+    console.error(order.id, error.code, error.message);
+  }
+}</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== STATUSES ====================== -->
+            <section class="section reveal" id="statuses">
+                <h2><i data-lucide="activity"></i> Statuses</h2>
+                <p class="section-intro">Every courier invents its own words for the same few things. We translate them
+                    into one list.</p>
+
+                <div class="status-grid">
+                    <span class="status-pill s-wait"><span class="dot"></span>pending</span>
+                    <span class="status-pill s-move"><span class="dot"></span>picked_up</span>
+                    <span class="status-pill s-move"><span class="dot"></span>in_transit</span>
+                    <span class="status-pill s-good"><span class="dot"></span>delivered</span>
+                    <span class="status-pill s-good"><span class="dot"></span>partial_delivered</span>
+                    <span class="status-pill s-bad"><span class="dot"></span>returned</span>
+                    <span class="status-pill s-bad"><span class="dot"></span>cancelled</span>
+                    <span class="status-pill s-wait"><span class="dot"></span>on_hold</span>
+                    <span class="status-pill s-bad"><span class="dot"></span>failed</span>
+                    <span class="status-pill"><span class="dot"></span>unknown</span>
+                </div>
+
+                <p>Write your <code>switch</code> against <code>status</code> and it will keep working when you add a
+                    courier. Need the courier's exact wording — for a support screen, say? It is always there as
+                    <code>providerStatus</code>.
+                </p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Courier says</th>
+                                <th>You get as <code>status</code></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Pathao <code>Pickup_Requested</code></td>
+                                <td><code>pending</code></td>
+                            </tr>
+                            <tr>
+                                <td>Pathao <code>At_the_Sorting_HUB</code></td>
+                                <td><code>in_transit</code></td>
+                            </tr>
+                            <tr>
+                                <td>Steadfast <code>partial_delivered</code></td>
+                                <td><code>partial_delivered</code></td>
+                            </tr>
+                            <tr>
+                                <td>Steadfast <code>hold</code></td>
+                                <td><code>on_hold</code></td>
+                            </tr>
+                            <tr>
+                                <td>Paperfly <code>inTransit: true</code></td>
+                                <td><code>in_transit</code></td>
+                            </tr>
+                            <tr>
+                                <td>Anything we don't recognise</td>
+                                <td><code>unknown</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-plain">
+                    <i data-lucide="help-circle"></i>
+                    <div>
+                        <p><strong>Why <code>unknown</code> instead of passing the raw word through?</strong> Because a
+                            surprise value silently falling into your <code>else</code> branch is how parcels get
+                            marked delivered when they weren't. <code>unknown</code> is honest, and
+                            <code>providerStatus</code> still tells you exactly what the courier said.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== CANCEL ====================== -->
+            <section class="section reveal" id="cancel-order">
+                <h2><i data-lucide="ban"></i> Cancel an order</h2>
+                <p class="section-intro">Read this before you build a "Cancel" button.</p>
+
+                <div class="callout callout-danger">
+                    <i data-lucide="alert-octagon"></i>
+                    <div>
+                        <p><strong>Pathao and Steadfast cannot cancel through their APIs.</strong> Calling
+                            <code>cancelOrder()</code> on either one throws <code>NOT_SUPPORTED</code>. That is
+                            deliberate.
+                        </p>
+                        <p>An earlier version of this library returned <code>{ status: 'cancelled' }</code> for
+                            Steadfast <em>without contacting the courier at all</em>. Shops marked orders cancelled in
+                            their own database while the parcel was still on a van. A loud error is far cheaper than a
+                            quiet lie.</p>
+                    </div>
+                </div>
+
+                <div class="lane">
+                    <span class="lane-label">Pathao</span>
+                    <span class="lane-pipe"></span>
+                    <span class="lane-end is-bad"><i data-lucide="x-circle"></i> throws NOT_SUPPORTED</span>
+                </div>
+                <div class="lane">
+                    <span class="lane-label">Steadfast</span>
+                    <span class="lane-pipe"></span>
+                    <span class="lane-end is-bad"><i data-lucide="x-circle"></i> throws NOT_SUPPORTED</span>
+                </div>
+                <div class="lane">
+                    <span class="lane-label">Paperfly</span>
+                    <span class="lane-pipe"></span>
+                    <span class="lane-end"><i data-lucide="alert-triangle"></i> implemented, unverified</span>
+                </div>
+
+                <h3>So how do I actually cancel one?</h3>
+                <ul>
+                    <li><strong>Pathao</strong> — cancel from the Pathao Merchant Panel.</li>
+                    <li><strong>Steadfast</strong> — raise a return request, or use the Steadfast merchant panel.</li>
+                    <li><strong>Paperfly</strong> — <code>cancelOrder()</code> exists, but the endpoint has not been
+                        confirmed against current Paperfly documentation. Test it against your own account before
+                        relying on it.</li>
+                </ul>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { callGateway } from 'bddeliveries';
+
+// Steadfast's nearest equivalent: ask for the parcel back
+await callGateway({
+  gateway: 'steadfast',
+  method: 'createReturnRequest',
+  invoice: 'INV-1002',
+  reason: 'Customer cancelled',
+});</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="callout callout-warn">
+                    <i data-lucide="alert-triangle"></i>
+                    <div>
+                        <p><strong>A return is not a cancellation.</strong> The parcel still travels; it just comes back
+                            to you. Don't present it to your users as a cancellation, and don't refund on the strength
+                            of the request alone.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== VALIDATION ====================== -->
+            <section class="section reveal" id="validation">
+                <h2><i data-lucide="shield-check"></i> What gets checked before anything is sent</h2>
+                <p class="section-intro">Bad data is caught in your own process, before a courier ever sees it.</p>
+
+                <p>Every <code>createOrder</code> call is validated first. If something is missing or malformed you get
+                    a <code>ValidationError</code> naming the exact fields — and <strong>no network request is
+                        made</strong>, so there is no half-created order to clean up.</p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>try {
+  await createOrder({ gateway: 'pathao', recipientName: 'John Doe' });
+} catch (error) {
+  error.code;     // "VALIDATION_ERROR"
+  error.fields;   // ["recipient_phone", "recipient_address", "merchant_order_id", "storeId"]
+  error.message;  // "Missing required field(s) for pathao: …"
+}</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="asterisk"></i></div>
+                        <h4>Required fields</h4>
+                        <p>Missing name, phone, address or invoice is caught immediately.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="hash"></i></div>
+                        <h4>Real numbers</h4>
+                        <p><code>codAmount: 'abc'</code> throws instead of quietly becoming <code>null</code>.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="ruler"></i></div>
+                        <h4>Sensible ranges</h4>
+                        <p>Pathao weight must be 0.5–10 kg; quantities at least 1.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="smartphone"></i></div>
+                        <h4>Valid phone numbers</h4>
+                        <p>Must be a real BD mobile number once normalized.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="map"></i></div>
+                        <h4>Address length</h4>
+                        <p>Pathao's 10-character minimum is enforced, not faked with padding.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="link"></i></div>
+                        <h4>Safe identifiers</h4>
+                        <p>Invoice numbers are URL-encoded, so an odd character can't redirect the request.</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-plain">
+                    <i data-lucide="scan-line"></i>
+                    <div>
+                        <p><strong>Why the fuss about address length?</strong> Pathao rejects addresses under 10
+                            characters. An earlier version padded short ones with spaces to sneak past that check — so
+                            the order was accepted and the rider got an address of blanks. We now refuse the order and
+                            tell you why.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== SAFE RETRIES ====================== -->
+            <section class="section reveal" id="safe-retries">
+                <h2><i data-lucide="repeat"></i> Timeouts and safe retries</h2>
+                <p class="section-intro">What happens when a courier's API is slow, flaky, or silent.</p>
+
+                <div class="card-grid">
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="timer"></i></div>
+                        <h4>15-second timeout</h4>
+                        <p>Every request gives up rather than hanging your server forever.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="refresh-cw"></i></div>
+                        <h4>Automatic retries</h4>
+                        <p>Reads retry twice with backoff on 5xx, 429 and network errors.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="shield-alert"></i></div>
+                        <h4>Never on createOrder</h4>
+                        <p>Retrying a booking would ship a second parcel. We don't.</p>
+                    </div>
+                </div>
+
+                <div class="callout callout-danger">
+                    <i data-lucide="package-x"></i>
+                    <div>
+                        <p><strong>The duplicate-parcel trap.</strong> If <code>createOrder</code> times out you cannot
+                            know whether the courier accepted it. Blindly calling it again is how shops end up sending
+                            the same order twice and paying twice.</p>
+                        <p><strong>The safe move:</strong> retry with <em>the same <code>invoice</code></em>. All three
+                            couriers treat it as your unique reference, so a duplicate is rejected or merged rather than
+                            duplicated. Never generate a fresh invoice number on retry.</p>
+                    </div>
+                </div>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>// Tune per gateway, or per call
+configure({ pathao: { timeoutMs: 8000, retries: 3 } });
+
+// Cancel a request from your own code (e.g. the user closed the tab)
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 5000);
+
+await createOrder({
+  gateway: 'pathao',
+  signal: controller.signal,
+  /* …order fields… */
+});</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="callout callout-tip">
+                    <i data-lucide="zap"></i>
+                    <div>
+                        <p><strong>Pathao logins are cached for you.</strong> Pathao requires a login before every
+                            action. The token is reused until it expires, and simultaneous requests share one login
+                            instead of stampeding — so ten orders cost one login, not ten.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== TESTING ====================== -->
+            <section class="section reveal" id="testing">
+                <h2><i data-lucide="flask-conical"></i> Testing without shipping real parcels</h2>
+                <p class="section-intro">Read this before pointing anything at a courier for the first time.</p>
+
+                <div class="lane">
+                    <span class="lane-label">Pathao</span>
+                    <span class="lane-pipe"></span>
+                    <span class="lane-end is-target"><i data-lucide="check-circle-2"></i> <code>sandbox: true</code>
+                        works</span>
+                </div>
+                <div class="lane">
+                    <span class="lane-label">Steadfast</span>
+                    <span class="lane-pipe"></span>
+                    <span class="lane-end"><i data-lucide="alert-triangle"></i> no sandbox — use
+                        <code>baseUrl</code></span>
+                </div>
+                <div class="lane">
+                    <span class="lane-label">Paperfly</span>
+                    <span class="lane-pipe"></span>
+                    <span class="lane-end"><i data-lucide="alert-triangle"></i> no sandbox — use
+                        <code>baseUrl</code></span>
+                </div>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>// Pathao has a real sandbox
+configure({ pathao: { /* …credentials… */, sandbox: true } });
+// or: PATHAO_SANDBOX=true
+
+// Steadfast and Paperfly have none — sandbox:true THROWS rather than
+// quietly using production. Point them at your own test server instead:
+configure({ steadfast: { /* …keys… */, baseUrl: 'https://mock.internal/api/v1' } });</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="callout callout-danger">
+                    <i data-lucide="siren"></i>
+                    <div>
+                        <p><strong>Why <code>sandbox: true</code> throws instead of being ignored.</strong> Steadfast
+                            and Paperfly publish no sandbox host. An earlier version accepted the flag and sent the
+                            request to production anyway — so a developer running "tests" was creating real parcels on a
+                            live account. Failing loudly is the only safe option.</p>
+                    </div>
+                </div>
+
+                <h3>Testing your own code</h3>
+                <p>The whole library talks to the network through <code>fetch</code>, so you can test your integration
+                    without any courier account at all — just replace <code>globalThis.fetch</code> in your tests. That
+                    is exactly how this library's own 87 tests run.</p>
+            </section>
+
+            <!-- ====================== ERRORS ====================== -->
+            <section class="section reveal" id="errors">
+                <h2><i data-lucide="alert-circle"></i> Errors</h2>
+                <p class="section-intro">Every failure is a <code>DeliveryError</code> with a machine-readable
+                    <code>code</code>. Branch on the code, never on the message text.
+                </p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { createOrder, DeliveryError, ValidationError } from 'bddeliveries';
+
+try {
+  await createOrder({ /* … */ });
+} catch (error) {
+  if (error instanceof ValidationError) {
+    return res.status(400).json({ fields: error.fields });   // your bug
+  }
+  if (error instanceof DeliveryError) {
+    if (error.code === 'TIMEOUT') return retryLater();       // courier is slow
+    if (error.code === 'NOT_SUPPORTED') return hideButton(); // courier can't
+    console.error(error.gateway, error.code, error.statusCode);
+  }
+  throw error;
+}</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>What went wrong</th>
+                                <th>What to do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>VALIDATION_ERROR</code></td>
+                                <td>Your order data is missing or malformed. Nothing was sent.</td>
+                                <td>Fix the input. Check <code>error.fields</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>MISSING_CREDENTIALS</code></td>
+                                <td>Credentials not found in any of the three tiers.</td>
+                                <td>Check <code>error.missingKeys</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>MISSING_PARAM</code></td>
+                                <td>A required identifier — usually <code>trackingId</code> — was absent.</td>
+                                <td>Pass the identifier.</td>
+                            </tr>
+                            <tr>
+                                <td><code>GATEWAY_NOT_FOUND</code></td>
+                                <td>Unknown courier name — usually a typo.</td>
+                                <td>See <code>error.supportedGateways</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>NOT_SUPPORTED</code></td>
+                                <td>The courier's API genuinely has no such feature.</td>
+                                <td>Don't offer it. Use the merchant panel.</td>
+                            </tr>
+                            <tr>
+                                <td><code>UNSUPPORTED_OPERATION</code></td>
+                                <td>This adapter doesn't implement that method.</td>
+                                <td>Check <code>getGatewayCapabilities()</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>NOT_FOUND</code></td>
+                                <td>The courier has no record of that order.</td>
+                                <td>Verify the tracking ID.</td>
+                            </tr>
+                            <tr>
+                                <td><code>TIMEOUT</code></td>
+                                <td>The courier didn't answer in time.</td>
+                                <td>Retry — with the same <code>invoice</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>NETWORK_ERROR</code></td>
+                                <td>DNS, TLS or connection failure.</td>
+                                <td>Retry with backoff.</td>
+                            </tr>
+                            <tr>
+                                <td><code>ABORTED</code></td>
+                                <td>You cancelled it via <code>signal</code>.</td>
+                                <td>Nothing — this is expected.</td>
+                            </tr>
+                            <tr>
+                                <td><code>API_ERROR</code></td>
+                                <td>The courier rejected the request.</td>
+                                <td>Read <code>error.message</code> and <code>statusCode</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>INVALID_RESPONSE</code></td>
+                                <td>The courier returned something that wasn't JSON.</td>
+                                <td>Usually an outage or a wrong <code>baseUrl</code>.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ====================== SECURITY ====================== -->
+            <section class="section reveal" id="security">
+                <h2><i data-lucide="lock"></i> Security</h2>
+                <p class="section-intro">Short list. All of it matters.</p>
+
+                <div class="card-grid">
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="server"></i></div>
+                        <h4>Server only</h4>
+                        <p>Never import this in browser or mobile code. Credentials would be readable by anyone.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="eye-off"></i></div>
+                        <h4>Secrets are redacted</h4>
+                        <p>Passwords, API keys and tokens are stripped from error payloads before they reach your logs.
+                        </p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="file-x"></i></div>
+                        <h4>Never commit .env</h4>
+                        <p>Once a credential is in git history, rotating it is the only fix.</p>
+                    </div>
+                    <div class="card reveal">
+                        <div class="card-icon"><i data-lucide="users"></i></div>
+                        <h4>Isolate tenants</h4>
+                        <p>Marketplaces must use <code>DeliveryClient</code>, not the global <code>configure()</code>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>// Safe to log — secrets are already redacted
+catch (error) {
+  logger.error(JSON.stringify(error));
+  // { name, message, gateway, code, statusCode,
+  //   responseBody: { password: "[redacted]", … } }
+}</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="callout callout-warn">
+                    <i data-lucide="key"></i>
+                    <div>
+                        <p><strong>Customer data is not redacted, and shouldn't be.</strong> Names, phone numbers and
+                            addresses appear in <code>error.responseBody</code> because you often need them to debug.
+                            Treat your logs as containing personal data and retain them accordingly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== EXTRAS ====================== -->
+            <section class="section reveal" id="extras">
+                <h2><i data-lucide="puzzle"></i> Courier extras</h2>
+                <p class="section-intro">Things only one courier can do, reached through <code>callGateway()</code>.</p>
+
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>import { callGateway } from 'bddeliveries';
+
+const { balance } = await callGateway({ gateway: 'steadfast', method: 'getBalance' });</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Courier</th>
+                                <th><code>method</code></th>
+                                <th>What it does</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>steadfast</td>
+                                <td><code>getBalance</code></td>
+                                <td>Your current account balance.</td>
+                            </tr>
+                            <tr>
+                                <td>steadfast</td>
+                                <td><code>createBulkOrder</code></td>
+                                <td>Book many parcels in one request. Pass <code>data: [...]</code>.</td>
+                            </tr>
+                            <tr>
+                                <td>steadfast</td>
+                                <td><code>createReturnRequest</code></td>
+                                <td>Ask for a parcel to come back.</td>
+                            </tr>
+                            <tr>
+                                <td>steadfast</td>
+                                <td><code>getReturnRequest</code> / <code>getReturnRequests</code></td>
+                                <td>One return, or all of them.</td>
+                            </tr>
+                            <tr>
+                                <td>steadfast</td>
+                                <td><code>getPayments</code> / <code>getPayment</code></td>
+                                <td>What the courier has paid you.</td>
+                            </tr>
+                            <tr>
+                                <td>steadfast</td>
+                                <td><code>getPoliceStations</code></td>
+                                <td>Delivery area reference data.</td>
+                            </tr>
+                            <tr>
+                                <td>pathao</td>
+                                <td><code>getStores</code></td>
+                                <td>Your pickup locations and their <code>storeId</code>s.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-tip">
+                    <i data-lucide="store"></i>
+                    <div>
+                        <p><strong>Don't know your Pathao <code>storeId</code>?</strong> Call
+                            <code>callGateway({ gateway: 'pathao', method: 'getStores' })</code> and read it off the
+                            list. If you send the wrong one, the error message lists your real stores for you.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== API REFERENCE ====================== -->
+            <section class="section reveal" id="api-reference">
+                <h2><i data-lucide="book-open"></i> API reference</h2>
+                <p class="section-intro">Everything the package exports.</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Export</th>
+                                <th>Type</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             <tr>
                                 <td><code>createOrder(options)</code></td>
-                                <td>Create an order through any gateway.</td>
-                                <td><code>Promise&lt;any&gt;</code></td>
+                                <td>async</td>
+                                <td>Book a parcel. Returns a <code>DeliveryResult</code>.</td>
                             </tr>
                             <tr>
                                 <td><code>trackOrder(options)</code></td>
-                                <td>Track an existing order.</td>
-                                <td><code>Promise&lt;any&gt;</code></td>
+                                <td>async</td>
+                                <td>Get current status.</td>
                             </tr>
                             <tr>
                                 <td><code>cancelOrder(options)</code></td>
-                                <td>Cancel an existing order.</td>
-                                <td><code>Promise&lt;any&gt;</code></td>
+                                <td>async</td>
+                                <td>Cancel, where supported.</td>
+                            </tr>
+                            <tr>
+                                <td><code>callGateway(options)</code></td>
+                                <td>async</td>
+                                <td>Courier-specific extras.</td>
+                            </tr>
+                            <tr>
+                                <td><code>getGatewayCapabilities(name)</code></td>
+                                <td>async</td>
+                                <td>Which operations a courier supports.</td>
                             </tr>
                             <tr>
                                 <td><code>getSupportedGateways()</code></td>
-                                <td>Returns array of supported gateway names.</td>
-                                <td><code>string[]</code></td>
+                                <td>sync</td>
+                                <td><code>['pathao', 'steadfast', 'paperfly']</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>configure(configs)</code></td>
+                                <td>sync</td>
+                                <td>Set global credentials.</td>
+                            </tr>
+                            <tr>
+                                <td><code>unconfigure(gateway)</code></td>
+                                <td>sync</td>
+                                <td>Remove one courier's credentials.</td>
+                            </tr>
+                            <tr>
+                                <td><code>clearConfig()</code></td>
+                                <td>sync</td>
+                                <td>Clear everything, including cached logins.</td>
+                            </tr>
+                            <tr>
+                                <td><code>clearTokenCaches()</code></td>
+                                <td>sync</td>
+                                <td>Drop cached logins only. Useful in tests.</td>
+                            </tr>
+                            <tr>
+                                <td><code>DeliveryClient</code></td>
+                                <td>class</td>
+                                <td>Isolated credentials, for marketplaces.</td>
+                            </tr>
+                            <tr>
+                                <td><code>STATUS</code></td>
+                                <td>object</td>
+                                <td>The canonical status values.</td>
+                            </tr>
+                            <tr>
+                                <td><code>DeliveryError</code></td>
+                                <td>class</td>
+                                <td>Base class for every failure.</td>
+                            </tr>
+                            <tr>
+                                <td><code>ValidationError</code></td>
+                                <td>class</td>
+                                <td>Bad input. Has <code>.fields</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>ConfigurationError</code></td>
+                                <td>class</td>
+                                <td>Credential problem. Has <code>.missingKeys</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>GatewayNotFoundError</code></td>
+                                <td>class</td>
+                                <td>Unknown courier. Has <code>.supportedGateways</code>.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            </section>
 
-            <section id="env-variables" class="section">
-                <h2><i data-lucide="lock"></i> Environment Variables</h2>
-                <p>Set these environment variables and skip <code>configure()</code> entirely.</p>
-
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Gateway</th>
-                                <th>Environment Variables</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Pathao</td>
-                                <td><code>PATHAO_CLIENT_ID</code>, <code>PATHAO_CLIENT_SECRET</code>, <code>PATHAO_USERNAME</code>, <code>PATHAO_PASSWORD</code>, <code>PATHAO_SANDBOX</code></td>
-                            </tr>
-                            <tr>
-                                <td>Steadfast</td>
-                                <td><code>STEADFAST_API_KEY</code>, <code>STEADFAST_SECRET_KEY</code>, <code>STEADFAST_SANDBOX</code></td>
-                            </tr>
-                            <tr>
-                                <td>Paperfly</td>
-                                <td><code>PAPERFLY_USERNAME</code>, <code>PAPERFLY_PASSWORD</code>, <code>PAPERFLY_SANDBOX</code></td>
-                             </tr>
-                        </tbody>
-                    </table>
+                <h3>What every call returns</h3>
+                <div class="code-block" data-lang="javascript">
+                    <pre><code>{
+  gateway: 'pathao',            // which courier answered
+  status: 'in_transit',         // canonical — safe to switch on
+  providerStatus: 'In_Transit', // the courier's own wording
+  trackingId: 'DA290124ABCDE',  // save this
+  raw: { /* the courier's untouched response */ },
+}</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
                 </div>
             </section>
+
+            <!-- ====================== ENV VARIABLES ====================== -->
+            <section class="section reveal" id="env-variables">
+                <h2><i data-lucide="terminal"></i> Environment variables</h2>
+                <p class="section-intro">Set these and you can skip <code>configure()</code> entirely.</p>
+
+                <div class="code-block" data-lang="bash">
+                    <pre><code># Pathao
+PATHAO_CLIENT_ID=
+PATHAO_CLIENT_SECRET=
+PATHAO_USERNAME=
+PATHAO_PASSWORD=
+PATHAO_STORE_ID=
+PATHAO_SANDBOX=true            # optional — Pathao is the only one with a sandbox
+
+# Steadfast
+STEADFAST_API_KEY=
+STEADFAST_SECRET_KEY=
+
+# Paperfly
+PAPERFLY_USERNAME=
+PAPERFLY_PASSWORD=
+PAPERFLY_KEY=                  # the merchant key Paperfly gave you</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="callout callout-warn">
+                    <i data-lucide="key-round"></i>
+                    <div>
+                        <p><strong><code>PAPERFLY_KEY</code> is required.</strong> An older version of this library
+                            shipped a hardcoded fallback key. If nobody noticed a missing key, orders were being sent
+                            under someone else's identity. There is no fallback now — supply your own.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== TYPESCRIPT ====================== -->
+            <section class="section reveal" id="typescript">
+                <h2><i data-lucide="code"></i> TypeScript</h2>
+                <p class="section-intro">Types ship with the package. Nothing extra to install.</p>
+
+                <p>Options are a discriminated union on <code>gateway</code>, so the editor knows which fields belong to
+                    which courier — and flags the ones that don't.</p>
+
+                <div class="code-block" data-lang="typescript">
+                    <pre><code>import { createOrder, type DeliveryResult } from 'bddeliveries';
+
+const order: DeliveryResult = await createOrder({
+  gateway: 'pathao',
+  invoice: 'INV-1',
+  recipientName: 'John Doe',
+  recipientPhone: '01711111111',
+  recipientAddress: 'House 12, Road 5, Dhanmondi, Dhaka',
+  alternativePhone: '01811111111',  // ❌ Error: Steadfast-only field
+});
+
+order.status;   // narrowed to the 10 canonical values — not `string`
+
+if (order.status === 'shipped') { }  // ❌ Error: not a valid status</code></pre>
+                    <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                </div>
+
+                <div class="callout callout-tip">
+                    <i data-lucide="check-circle-2"></i>
+                    <div>
+                        <p>Both errors above are real — they're pinned by compile-time tests in the repo, so the types
+                            can't quietly stop catching them.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== ADD A COURIER ====================== -->
+            <section class="section reveal" id="adding-courier">
+                <h2><i data-lucide="plus-circle"></i> Adding a courier</h2>
+                <p class="section-intro">Four steps. You never touch <code>config.js</code> or <code>index.js</code>.
+                </p>
+
+                <ol class="steps">
+                    <li>
+                        <h4>Create <code>src/gateways/mycourier.js</code></h4>
+                        <p>One file per courier. Nothing else needs to know it exists.</p>
+                    </li>
+                    <li>
+                        <h4>Export a <code>META</code> block</h4>
+                        <div class="code-block" data-lang="javascript">
+                            <pre><code>export const META = {
+  envMap: {
+    apiKey: 'MYCOURIER_API_KEY',
+    sandbox: 'MYCOURIER_SANDBOX',
+  },
+  requiredKeys: ['apiKey'],
+  capabilities: ['createOrder', 'trackOrder'],
+};</code></pre>
+                            <button class="copy-btn"><i data-lucide="copy"></i> Copy</button>
+                        </div>
+                    </li>
+                    <li>
+                        <h4>Implement only what the courier really supports</h4>
+                        <p>Use <code>request()</code> from <code>src/utils.js</code>, the validators from
+                            <code>src/validation.js</code>, and the canonical statuses from <code>src/status.js</code>.
+                        </p>
+                    </li>
+                    <li>
+                        <h4>Register it in <code>src/gateways/index.js</code></h4>
+                        <p>One line. Adapters are loaded lazily, so an unused courier costs nothing.</p>
+                    </li>
+                </ol>
+
+                <div class="callout callout-danger">
+                    <i data-lucide="shield-x"></i>
+                    <div>
+                        <p><strong>The one rule.</strong> If the courier can't do something, <em>throw</em>
+                            <code>NOT_SUPPORTED</code>. Never return a success-shaped object for work that didn't
+                            happen. That single mistake — a <code>cancelOrder</code> that returned "cancelled" without
+                            calling anyone — is the reason this library was audited.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====================== FAQ ====================== -->
+            <section class="section reveal" id="faq">
+                <h2><i data-lucide="messages-square"></i> Common questions</h2>
+                <p class="section-intro">The things people ask on day one.</p>
+
+                <details>
+                    <summary>Can I use more than one courier at the same time?</summary>
+                    <div class="details-body">
+                        <p>Yes — that's the point. Configure all three, then choose per order. A common pattern is
+                            picking by destination or by which courier is cheapest for that weight. Your code is
+                            identical either way; only <code>gateway</code> changes.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>What if I only ever use one courier?</summary>
+                    <div class="details-body">
+                        <p>Perfectly fine. You still get validation, timeouts, retries, canonical statuses and typed
+                            errors — and if you ever add a second courier, you won't rewrite anything.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>How do I know if a parcel was delivered?</summary>
+                    <div class="details-body">
+                        <p>Poll <code>trackOrder()</code> and check for <code>status === 'delivered'</code>. There are
+                            no webhooks from these couriers, so a scheduled job is the standard approach — see
+                            <a href="#track-order">the polling example</a>.
+                        </p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Why does <code>cancelOrder</code> throw for Pathao and Steadfast?</summary>
+                    <div class="details-body">
+                        <p>Because their APIs have no cancel endpoint. The alternative — returning "cancelled" without
+                            contacting anyone — is what an earlier version did, and shops ended up with cancelled orders
+                            in their database and live parcels on the road. Cancel from the merchant panel instead.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>My order failed with <code>VALIDATION_ERROR</code>. Was anything sent?</summary>
+                    <div class="details-body">
+                        <p>No. Validation runs before any network call, so there is nothing to clean up. Read
+                            <code>error.fields</code>, fix the input, and call again.
+                        </p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Can I retry a failed <code>createOrder</code>?</summary>
+                    <div class="details-body">
+                        <p>Yes — but reuse the same <code>invoice</code>. All three couriers treat it as your unique
+                            reference, so a repeat is rejected or merged rather than creating a second parcel. Generating
+                            a new invoice number on retry is how duplicates happen.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Where do I find my Pathao <code>storeId</code>?</summary>
+                    <div class="details-body">
+                        <p>In the Pathao Merchant Panel, or by calling
+                            <code>callGateway({ gateway: 'pathao', method: 'getStores' })</code>. If you send a wrong
+                            one, the error message lists your real stores.
+                        </p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Is it safe to log the error object?</summary>
+                    <div class="details-body">
+                        <p>Credentials, yes — passwords, keys and tokens are redacted automatically. Customer names,
+                            phone numbers and addresses are <em>not</em> redacted, because you usually need them for
+                            debugging. Treat your logs as containing personal data.</p>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Does this work with CommonJS (<code>require</code>)?</summary>
+                    <div class="details-body">
+                        <p>Not directly — the package is ESM only. In a CommonJS project use a dynamic import:
+                            <code>const bd = await import('bddeliveries')</code>.
+                        </p>
+                    </div>
+                </details>
+            </section>
+
+            <footer class="doc-footer">
+                <span>BDDeliveries v1.1.0 — MIT licensed.</span>
+                <span>Built for Bangladeshi couriers: Pathao · Steadfast · Paperfly</span>
+            </footer>
+
         </main>
     </div>
 
-    <!-- Script for UI Interactions -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            const html = document.documentElement;
-            const body = document.body;
-            
-            // Theme toggling
-            const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
-            const themeToggleMobile = document.getElementById('theme-toggle-mobile');
-            
-            function toggleTheme() {
-                if (body.classList.contains('dark')) {
-                    body.classList.replace('dark', 'light');
-                    localStorage.setItem('theme', 'light');
-                } else {
-                    body.classList.replace('light', 'dark');
-                    localStorage.setItem('theme', 'dark');
+        (function () {
+            'use strict';
+
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            /* ---------- Icons ---------- */
+            function drawIcons() {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
                 }
             }
-            
-            themeToggleDesktop.addEventListener('click', toggleTheme);
-            themeToggleMobile.addEventListener('click', toggleTheme);
-            
-            // Sidebar toggling for mobile
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebarClose = document.getElementById('sidebar-close');
-            const sidebar = document.querySelector('.sidebar');
-            
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.add('active');
-            });
-            
-            sidebarClose.addEventListener('click', () => {
-                sidebar.classList.remove('active');
+            drawIcons();
+            window.addEventListener('load', drawIcons);
+
+            /* ---------- Theme ---------- */
+            var body = document.body;
+            var stored = null;
+            try { stored = localStorage.getItem('bddeliveries-theme'); } catch (e) { }
+
+            if (stored) {
+                body.className = stored;
+            } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+                body.className = 'light';
+            }
+
+            function toggleTheme() {
+                var next = body.classList.contains('dark') ? 'light' : 'dark';
+                body.className = next;
+                try { localStorage.setItem('bddeliveries-theme', next); } catch (e) { }
+            }
+
+            ['theme-desktop', 'theme-mobile'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('click', toggleTheme);
             });
 
-            // Smooth scrolling for sidebar links
-            const links = document.querySelectorAll('.sidebar-nav a[href^="#"]');
-            links.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if(window.innerWidth <= 768) sidebar.classList.remove('active');
-                    
-                    document.querySelectorAll('.sidebar-nav a').forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const targetId = this.getAttribute('href');
-                    const targetEl = document.querySelector(targetId);
-                    if (targetEl) {
-                        window.scrollTo({
-                            top: targetEl.offsetTop - 80,
-                            behavior: 'smooth'
-                        });
+            /* ---------- Mobile nav ---------- */
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('overlay');
+
+            function openNav() {
+                sidebar.classList.add('is-open');
+                overlay.classList.add('is-open');
+            }
+            function closeNav() {
+                sidebar.classList.remove('is-open');
+                overlay.classList.remove('is-open');
+            }
+
+            var menuOpen = document.getElementById('menu-open');
+            var menuClose = document.getElementById('menu-close');
+            if (menuOpen) menuOpen.addEventListener('click', openNav);
+            if (menuClose) menuClose.addEventListener('click', closeNav);
+            if (overlay) overlay.addEventListener('click', closeNav);
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeNav();
+            });
+
+            /* ---------- Copy buttons ---------- */
+            document.querySelectorAll('.copy-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var block = btn.closest('.code-block');
+                    var code = block ? block.querySelector('code') : null;
+                    if (!code) return;
+
+                    var done = function () {
+                        btn.classList.add('copied');
+                        btn.innerHTML = '<i data-lucide="check"></i> Copied';
+                        drawIcons();
+                        setTimeout(function () {
+                            btn.classList.remove('copied');
+                            btn.innerHTML = '<i data-lucide="copy"></i> Copy';
+                            drawIcons();
+                        }, 1600);
+                    };
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(code.innerText).then(done).catch(function () { });
+                    } else {
+                        var ta = document.createElement('textarea');
+                        ta.value = code.innerText;
+                        ta.style.position = 'fixed';
+                        ta.style.opacity = '0';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        try { document.execCommand('copy'); done(); } catch (e) { }
+                        document.body.removeChild(ta);
                     }
                 });
             });
 
-            // Copy code blocks
-            const copyBtns = document.querySelectorAll('.copy-btn');
-            copyBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const code = btn.previousElementSibling.innerText;
-                    navigator.clipboard.writeText(code).then(() => {
-                        const originalText = btn.innerHTML;
-                        btn.innerHTML = '<i data-lucide="check"></i> Copied';
-                        lucide.createIcons();
-                        setTimeout(() => {
-                            btn.innerHTML = originalText;
-                            lucide.createIcons();
-                        }, 2000);
+            /* ---------- Tabs ---------- */
+            document.querySelectorAll('.tabs').forEach(function (group) {
+                var buttons = group.querySelectorAll('.tab-btn');
+                var panels = group.querySelectorAll('.tab-panel');
+
+                function select(id) {
+                    buttons.forEach(function (b) {
+                        b.setAttribute('aria-selected', String(b.dataset.tab === id));
+                    });
+                    panels.forEach(function (p) {
+                        p.classList.toggle('is-active', p.id === id);
+                    });
+                }
+
+                buttons.forEach(function (b) {
+                    b.addEventListener('click', function () { select(b.dataset.tab); });
+                });
+
+                if (buttons.length) select(buttons[0].dataset.tab);
+            });
+
+            /* ---------- Scroll progress ---------- */
+            var progress = document.getElementById('progress');
+            var ticking = false;
+
+            function drawProgress() {
+                var max = document.documentElement.scrollHeight - window.innerHeight;
+                var pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+                progress.style.width = pct + '%';
+                ticking = false;
+            }
+
+            if (!reduceMotion) {
+                window.addEventListener('scroll', function () {
+                    if (!ticking) {
+                        ticking = true;
+                        window.requestAnimationFrame(drawProgress);
+                    }
+                }, { passive: true });
+                drawProgress();
+            }
+
+            /* ---------- Cursor spotlight on cards ---------- */
+            if (!reduceMotion && window.matchMedia('(hover: hover)').matches) {
+                document.querySelectorAll('.card, .gateway-card, .mode-card').forEach(function (el) {
+                    el.addEventListener('pointermove', function (e) {
+                        var r = el.getBoundingClientRect();
+                        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+                        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
                     });
                 });
+            }
+
+            /* ---------- Stagger indices for tables and steps ---------- */
+            document.querySelectorAll('.table-container tbody tr').forEach(function (row, i) {
+                row.style.setProperty('--r', i % 12);
             });
-        });
+            document.querySelectorAll('.steps').forEach(function (list) {
+                list.querySelectorAll(':scope > li').forEach(function (li, i) {
+                    li.style.setProperty('--s', i);
+                });
+            });
+
+            /* ---------- Count-up numbers ---------- */
+            function countUp(el) {
+                var target = parseInt(el.dataset.to, 10) || 0;
+                if (reduceMotion) { el.textContent = String(target); return; }
+
+                var start = performance.now();
+                var dur = 1100;
+
+                function tick(now) {
+                    var p = Math.min((now - start) / dur, 1);
+                    var eased = 1 - Math.pow(1 - p, 3);
+                    el.textContent = String(Math.round(target * eased));
+                    if (p < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+            }
+
+            /* ---------- Scroll reveal ---------- */
+            var revealables = document.querySelectorAll(
+                '.reveal, .flow, .mode-card, .section, .table-container, .steps'
+            );
+
+            if (reduceMotion || !('IntersectionObserver' in window)) {
+                revealables.forEach(function (el) { el.classList.add('is-visible'); });
+            } else {
+                var revealer = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            revealer.unobserve(entry.target);
+                        }
+                    });
+                }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+
+                revealables.forEach(function (el) { revealer.observe(el); });
+            }
+
+            /* ---------- Counters (fire once, when the hero badges are on screen) ---------- */
+            var counters = document.querySelectorAll('.counter');
+            if (!('IntersectionObserver' in window)) {
+                counters.forEach(countUp);
+            } else {
+                var counterObs = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (!entry.isIntersecting) return;
+                        counterObs.unobserve(entry.target);
+                        countUp(entry.target);
+                    });
+                }, { threshold: 0.6 });
+                counters.forEach(function (el) { counterObs.observe(el); });
+            }
+
+            /* ---------- Credential cascade: highlight 1 → 2 → 3 once on view ---------- */
+            var cascade = document.getElementById('cascade');
+            if (cascade && !reduceMotion && 'IntersectionObserver' in window) {
+                var cascadeSeen = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (!entry.isIntersecting) return;
+                        cascadeSeen.unobserve(entry.target);
+                        var tiers = entry.target.querySelectorAll('.tier');
+                        tiers.forEach(function (tier, i) {
+                            setTimeout(function () {
+                                tier.classList.add('pulse');
+                                setTimeout(function () { tier.classList.remove('pulse'); }, 620);
+                            }, 240 + i * 260);
+                        });
+                    });
+                }, { threshold: 0.45 });
+                cascadeSeen.observe(cascade);
+            }
+
+            /* ---------- Scrollspy ---------- */
+            var links = Array.prototype.slice.call(document.querySelectorAll('.sidebar-nav a'));
+            var targets = links
+                .map(function (a) { return document.querySelector(a.getAttribute('href')); })
+                .filter(Boolean);
+
+            function setActive(id) {
+                links.forEach(function (a) {
+                    a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+                });
+            }
+
+            if ('IntersectionObserver' in window && targets.length) {
+                var visible = new Map();
+                var spy = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) visible.set(entry.target.id, entry.intersectionRatio);
+                        else visible.delete(entry.target.id);
+                    });
+                    var best = null, bestTop = Infinity;
+                    visible.forEach(function (_ratio, id) {
+                        var top = document.getElementById(id).getBoundingClientRect().top;
+                        if (top < bestTop) { bestTop = top; best = id; }
+                    });
+                    if (best) setActive(best);
+                }, { rootMargin: '-84px 0px -55% 0px', threshold: [0, 0.25, 0.6] });
+
+                targets.forEach(function (t) { spy.observe(t); });
+            }
+
+            links.forEach(function (a) {
+                a.addEventListener('click', function () {
+                    setActive(a.getAttribute('href').slice(1));
+                    if (window.innerWidth <= 860) closeNav();
+                });
+            });
+        })();
     </script>
 </body>
+
 </html>

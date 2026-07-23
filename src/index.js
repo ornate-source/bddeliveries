@@ -113,9 +113,17 @@ export async function callGateway({ gateway, method, ...options }) {
  */
 export async function getGatewayCapabilities(gateway) {
   const adapter = await getGateway(gateway);
+
+  // META.capabilities is the source of truth, not the presence of an export: an
+  // unsupported operation is still *exported*, because it has to throw NOT_SUPPORTED
+  // rather than be missing. Reporting it as available would defeat the point of asking.
+  const declared = adapter.META?.capabilities;
+
   const capabilities = {};
   for (const method of ALLOWED_METHODS) {
-    capabilities[method] = typeof adapter[method] === "function";
+    capabilities[method] = Array.isArray(declared)
+      ? declared.includes(method)
+      : typeof adapter[method] === "function";
   }
   return capabilities;
 }

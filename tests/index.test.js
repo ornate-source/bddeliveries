@@ -99,6 +99,22 @@ test("getGatewayCapabilities reports what each adapter implements", async () => 
   assert.strictEqual(paperfly.getBalance, false);
 });
 
+// An unsupported operation is still exported — it has to be, so it can throw
+// NOT_SUPPORTED. Reporting it as available would make the whole function useless.
+test("getGatewayCapabilities reports false for an operation that only throws", async () => {
+  for (const gateway of ["pathao", "steadfast"]) {
+    const caps = await getGatewayCapabilities(gateway);
+    assert.strictEqual(caps.cancelOrder, false, `${gateway} should not advertise cancelOrder`);
+
+    const adapter = await getGateway(gateway);
+    assert.strictEqual(
+      typeof adapter.cancelOrder,
+      "function",
+      `${gateway} must still export cancelOrder so it can throw`
+    );
+  }
+});
+
 /* ---------------------------------------------------------------- *
  * Finding #22 — this was the only pre-existing assertion; kept.
  * ---------------------------------------------------------------- */
